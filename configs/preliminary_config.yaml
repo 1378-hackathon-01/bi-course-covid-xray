@@ -1,0 +1,113 @@
+# Конфигурация предварительного этапа — все 7 пунктов §1.1 методических рекомендаций
+dataset:
+  source: 'Kaggle: tawsifurrahman/covid19-radiography-database (COVID-19 Radiography
+    Database)'
+  mirror_used: 'github.com/junelsolis/covid-19-radiography-dataset (проверено: счётчики
+    файлов по классам совпадают с v4)'
+  version: v4 (раскладка 2021-02-08)
+  classes_used:
+  - COVID
+  - Normal
+  origin_counts_v4:
+    COVID: 3616
+    Normal: 10192
+    Lung_Opacity: 6012
+    Viral_Pneumonia: 1345
+  organized_pool:
+    total: 7200
+    per_class: 3600
+    rule: 'organize_dataset(max_per_class=3600): первые 3600 отсортированных файлов
+      на класс'
+  license: Data files © Original Authors (указание на странице Kaggle)
+splits:
+  scheme: 80/10/10 -> 5760/720/720; torch.utils.data.random_split (Generator seed=42);
+    без стратификации
+  seed: 42
+  sizes:
+    train: 5760
+    val: 720
+    test: 720
+  class_counts:
+    train:
+      COVID: 2884
+      Normal: 2876
+    val:
+      COVID: 355
+      Normal: 365
+    test:
+      COVID: 361
+      Normal: 359
+  indices_file: split_indices.json
+  seed_setting: random.seed / np.random.seed / torch.manual_seed / torch.cuda.manual_seed_all(42)
+    + cudnn.deterministic
+model:
+  architecture: ResNet18 (torchvision) + Sequential(Dropout(0.5), Linear(512, 2));
+    классы COVID=0, Normal=1
+  initialization: ImageNet (IMAGENET1K_V1), transfer learning; все слои заморожены,
+    кроме layer4 и головы fc
+  parameters: 11177538
+  checkpoint: baseline_model.pt (frozen; SHA-256 0ba793cb43d0f058...)
+training:
+  optimizer: Adam (weight_decay=1e-5)
+  learning_rate: 0.0001
+  weight_decay: 1.0e-05
+  batch_size: 32
+  epochs: 20
+  scheduler: ReduceLROnPlateau(mode=max, factor=0.5, patience=3, min_lr=1e-7)
+  early_stopping_patience: 5
+  criterion: CrossEntropyLoss
+  augmentation:
+  - RandomHorizontalFlip(p=0.5)
+  - RandomRotation(10)
+  - ColorJitter(brightness=0.2, contrast=0.2)
+  eval_preprocessing: Resize(224,224) -> ToTensor -> Normalize(ImageNet mean/std)
+  best_epoch: 15
+  best_val_accuracy: 0.9917
+  environment:
+    date: 2026-02-08 10:15
+    device: cuda
+    gpu: NVIDIA Tesla T4 (Google Colab), 15.8 GB
+    pytorch_at_training: 2.9.0+cu126
+    training_time: не фиксировался в исходных артефактах (ограничение предварительного
+      этапа)
+    epochs_completed: 20
+    early_stopping: patience=5; срабатывание после 20-й эпохи (улучшений 5 эпох подряд
+      не было); лучшая эпоха — 15 (val_acc 0.9917)
+libraries:
+  torch: 2.9.1+cu130
+  torchvision: 0.24.1+cu130
+  numpy: 2.3.3
+  scipy: 1.16.2
+  sklearn: 1.7.2
+  pandas: 2.3.3
+  PIL: 11.3.0
+  matplotlib: 3.10.6
+  seaborn: 0.13.2
+  cleanlab: 2.9.0
+  imagehash: 4.3.2
+  torchattacks: 3.5.1
+  pyiqa: 0.1.16
+  cv2: 5.0.0
+  skimage: 0.26.0
+  scipy_note: используется также для BCa-bootstrap (scipy.stats.bootstrap)
+metric:
+  name: Accuracy
+  computation_method: доля объектов теста, у которых argmax(logits) == истинная метка;
+    эквивалент sklearn.metrics.accuracy_score
+  ci_method: интервал Уилсона (95%) для доли событий
+  justification: тест сбалансирован (361 COVID / 359 Normal, отношение 1.006), поэтому
+    Accuracy не смещена; §1.2 методики
+frozen_baseline_rule: базовая модель используется во всех четырёх практических работах
+  без изменения её параметров (practice_ai.pdf §1); чекпойнт best_model.pth только
+  загружается
+authors:
+  group: '1378'
+  students:
+  - Панов А. Ю.
+  - Семенов М. Д.
+  - Ханна М. Н.
+artifacts:
+  training_history: training_history.json
+  training_notebook: train_eval.ipynb
+  metrics: metrics.json
+  checksums: checksums.sha256
