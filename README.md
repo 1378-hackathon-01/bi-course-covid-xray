@@ -126,7 +126,7 @@ membership-inference signals); it is **not** claimed to be solved here.
 ## 6. Quickstart
 
 ```bash
-git clone https://github.com/username/bi-course-covid-xray.git
+git clone https://github.com/minaNabil96/bi-course-covid-xray.git
 cd bi-course-covid-xray
 git lfs pull                       # fetch models/baseline_model.pt
 

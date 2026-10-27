@@ -12,7 +12,7 @@
 ### 2. Clone the repository with LFS
 
 ```bash
-git clone https://github.com/username/bi-course-covid-xray.git
+git clone https://github.com/minaNabil96/bi-course-covid-xray.git
 cd bi-course-covid-xray
 git lfs pull
 ```
@@ -73,7 +73,7 @@ lists the PR1 files. Compare the outputs of the programs above with the stored J
 ### 2. Клонирование с LFS
 
 ```bash
-git clone https://github.com/username/bi-course-covid-xray.git
+git clone https://github.com/minaNabil96/bi-course-covid-xray.git
 cd bi-course-covid-xray
 git lfs pull
 ```

@@ -128,7 +128,7 @@ membership inference); утверждать, что проблема «реше�
 ## 6. Быстрый старт
 
 ```bash
-git clone https://github.com/username/bi-course-covid-xray.git
+git clone https://github.com/minaNabil96/bi-course-covid-xray.git
 cd bi-course-covid-xray
 git lfs pull                       # загрузить models/baseline_model.pt
 
