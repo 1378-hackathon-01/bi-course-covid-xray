@@ -1,0 +1,23 @@
+{
+ "hardware": "CPU",
+ "device": "cpu",
+ "torch_version": "2.9.1+cu130",
+ "n_images": 100,
+ "n_warmup": 5,
+ "mean_ms_per_image": 14.698981000692584,
+ "std_ms_per_image": 0.8072828316480577,
+ "median_ms_per_image": 14.684050023788586,
+ "p95_ms_per_image": 15.95667504298035,
+ "min_ms_per_image": 13.06790002854541,
+ "max_ms_per_image": 17.172900028526783,
+ "batch_size": 1,
+ "image_size": [
+  224,
+  224
+ ],
+ "threads": 10,
+ "checkpoint": "baseline_model.pt (frozen, не переобучался)",
+ "test_indices_source": "PRELIMINARY_SUBMISSION_V2/split_indices.json → test_indices[:100]",
+ "purpose": "Частичное восполнение G-1: длительность обучения не восстанавливается; зафиксирована стоимость инференса на замороженном чекпоинте.",
+ "timestamp": "2026-10-27T09:54:29+00:00"
+}

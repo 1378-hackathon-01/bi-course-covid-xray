@@ -1,0 +1,1 @@
+"""BIИ course repository package."""
