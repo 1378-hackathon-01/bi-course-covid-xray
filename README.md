@@ -5,10 +5,9 @@ studied through the practical cycle of the course
 «Безопасность и доверенность систем искусственного интеллекта»
 (*Security and Trustworthiness of Artificial Intelligence Systems*).
 
-This repository contains the **completed preliminary stage** (methodology §1),
-**Practical Work №1 — Data Quality Investigation** (methodology §2), and the
-**consolidated final report** covering the full PR1–PR4 cycle (methodology §6).
-Full PR2–PR4 submission packages are maintained separately and are not stored here.
+This repository contains the **completed preliminary stage** (methodology §1) and
+**Practical Work №1 — Data Quality Investigation** (methodology §2). Practical works
+PR2, PR3 and PR4 are represented by placeholders and will be added without restructuring.
 
 ---
 
@@ -44,12 +43,11 @@ attributable to the studied effect rather than to retraining.
 2. **PR1 (§2)** — a quantitative, multidimensional data-quality profile: completeness,
    validity, uniqueness, train↔test leakage, balance, label quality (Confident Learning),
    representativeness (MMD + C2ST) and image anomalies (BRISQUE, NIQE, blur, borders).
-3. **Final report (§6)** — a consolidated 17-page report covering PR1–PR4, with conditional
-   conclusions, limitations and appendices; see `final_report/`.
 
-**What is not included:** full PR2–PR4 submission archives (maintained separately), the
-dataset, the course PDFs and the original demo application. The `PR2/`, `PR3/`, `PR4/`
-folders keep package READMEs; `final_report/` contains the consolidated report.
+**What is not included (yet):** PR2, PR3, PR4 results and the final consolidated report.
+Their folders exist as placeholders so that future work does not require renaming or
+moving any file. The dataset itself, the course PDFs and the original demo application
+are **not** redistributed here.
 
 ## 4. Repository structure
 
@@ -79,13 +77,13 @@ BI-COURSE-REPO/
 │   ├── preliminary/                # metrics.json, training_history.json, split_indices.json, latency
 │   └── pr1/                        # metrics_pr1.json, quality_profile.csv, label_inspection.csv, ...
 ├── reports/                        # БИИ_preliminary + БИИ_preliminary_simple (pdf|docx)
-├── figures/                        # preliminary/ and pr1/ (300-dpi PNGs)
+├── figures/                        # preliminary/ (empty for now), pr1/ (300-dpi PNGs)
 ├── scripts/                        # reproduce_preliminary.py, reproduce_pr1.py, latency tool
 ├── tests/                          # pytest smoke tests (data, model, metrics)
-├── PR2/                            # package README (full V2 package external)
-├── PR3/                            # package README (full V2 package external)
-├── PR4/                            # package README (full V2 package external)
-└── final_report/                   # Final_Report.pdf / .docx (consolidated PR1–PR4)
+├── PR2/                            # placeholder: Corruption Robustness (TODO)
+├── PR3/                            # placeholder: Adversarial Robustness (TODO)
+├── PR4/                            # placeholder: Privacy / MIA (TODO)
+└── final_report/                   # placeholder: consolidated report (TODO after PR4)
 ```
 
 ## 5. Key results
@@ -124,14 +122,6 @@ duplicates and 7 + 64 train↔test pairs constitute a real file-level leakage: s
 images have near-identical twins in the training set. This property is documented and
 carried into the interpretation of PR2–PR4 (it may slightly inflate robustness and
 membership-inference signals); it is **not** claimed to be solved here.
-
-**Consolidated final report (PR1–PR4).** `final_report/Final_Report.pdf` is a 17-page
-Russian report with 10 tables and 7 figures. It records the frozen baseline
-(M(0) = 0.9833 [0.9711; 0.9904]), the corruption and adversarial robustness results, and a
-**weak, borderline** membership-inference signal (ROC-AUC ≈ 0.556; TPR@FPR ≤ 1% essentially
-zero). The conclusions are explicitly conditional: they are limited by the threat model,
-the selected corruption/attack budgets, image-level privacy unit, duplicates/leakage and
-statistical uncertainty. See `final_report/README.md` for the full caveat list.
 
 ## 6. Quickstart
 

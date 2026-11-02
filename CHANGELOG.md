@@ -30,17 +30,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), adheres to
 
 ## [Unreleased]
 
-### Added
+### Planned
 
-- Consolidated final report covering the full PR1-PR4 cycle (`final_report/Final_Report.pdf`
-  and `.docx`, 17 pages): baseline, data quality, corruption robustness, adversarial
-  robustness, membership inference, synthesis, limitations and conditional conclusion.
-- Completed PR2, PR3 and PR4 packages as separate V2 submission archives; package READMEs
-  in `PR2/`, `PR3/`, `PR4/` now record status and key results.
-
-### Changed
-
-- Root README (English and Russian) now points to the consolidated final report and states
-  the applicable caveats: APGD-CE on n = 20 is not full AutoAttack; the untargeted protocol
-  does not measure error direction; the PR4 membership signal is weak/borderline rather than
-  strong leakage.
+- PR2: Corruption Robustness (noise, blur, JPEG, brightness) — R(s) curves and R-AUC.
+- PR3: Adversarial Robustness (white-box: FGSM, PGD, AutoAttack sanity check).
+- PR4: Privacy — Membership Inference Attack (ROC-AUC, TPR@FPR, generalization gap).
+- Final consolidated report.
