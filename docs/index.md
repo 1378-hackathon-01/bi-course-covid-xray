@@ -22,7 +22,8 @@ using the programs in `scripts/`.
 1. Read the top-level `README.md` for context and key results.
 2. Open `reports/БИИ_preliminary.pdf` for the full Russian-language report (a single
    cumulative document that starts with the preliminary stage and is extended as each
-   practical work is completed).
+   practical work is completed). The standalone report for practical work 1 is
+   `reports/БИИ_PR1.pdf`.
 3. Follow `reproduction_guide.md` to rebuild the numbers locally.
 4. Inspect `results/` for the exact values with confidence intervals.
 

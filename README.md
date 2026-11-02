@@ -76,7 +76,7 @@ BI-COURSE-REPO/
 ├── results/
 │   ├── preliminary/                # metrics.json, training_history.json, split_indices.json, latency
 │   └── pr1/                        # metrics_pr1.json, quality_profile.csv, label_inspection.csv, ...
-├── reports/                        # БИИ_preliminary + БИИ_preliminary_simple (pdf|docx)
+├── reports/                        # БИИ_preliminary (+ simple) and БИИ_PR1 (pdf|docx)
 ├── figures/                        # preliminary/ (empty for now), pr1/ (300-dpi PNGs)
 ├── scripts/                        # reproduce_preliminary.py, reproduce_pr1.py, latency tool
 ├── tests/                          # pytest smoke tests (data, model, metrics)

@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/), adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Standalone **PR1 report** `reports/БИИ_PR1.docx` / `reports/БИИ_PR1.pdf`
+  (Russian, 13 pages, no formulas): methodology, eight quality characteristics with
+  95 % Wilson CIs, near-duplicate train↔test examples, brightness/blur distributions,
+  anomalies and conclusions.
+
 ## [1.0.0] — 2026-02-08
 
 ### Added
