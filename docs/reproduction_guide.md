@@ -56,10 +56,26 @@ pixel-verified near duplicates, and compares them with `results/pr1/quality_prof
 Embedding-based checks (MMD, C2ST) and label-quality analysis are reproduced by the
 executed notebook `notebooks/01_data_quality.ipynb`.
 
-### 8. Verify stored artifacts
+### 8. Reproduce the PR2 robustness metrics
 
-Every artifact in `results/` was produced by the executed notebooks; `results/pr1/checksums.sha256`
-lists the PR1 files. Compare the outputs of the programs above with the stored JSON/CSV.
+```bash
+python scripts/reproduce_pr2.py
+# expected: M(0) = 0.983333, 20 R(s)/ΔM/R_rel checks and 4 R-AUC checks, RESULT: PASS
+```
+
+The program is model-free: it rebuilds R(s), ΔM(s), R_rel(s) and R-AUC from the stored
+per-object correctness (`results/pr2/correctness.pkl`) and compares them with
+`results/pr2/summary_table.tsv` and `results/pr2/rauc.csv`. The bootstrap confidence
+intervals (hierarchical/paired bootstrap, B = 2000, percentile + BCa) are reproduced by
+`notebooks/02_corruption_robustness.ipynb`, which needs the checkpoint and the dataset;
+the resulting curves are in `figures/pr2/robustness_curves.png`.
+
+### 9. Verify stored artifacts
+
+Every artifact in `results/` was produced by the executed notebooks;
+`results/pr1/checksums.sha256` lists the PR1 files and `results/pr2/checksums.sha256`
+lists the PR2 files plus the inherited preliminary artifacts. Compare the outputs of the
+programs above with the stored JSON/CSV.
 
 ## Русский
 
@@ -117,7 +133,23 @@ python scripts/reproduce_pr1.py --skip-phash    # быстрый детерми�
 `results/pr1/quality_profile.csv`. Проверки на эмбеддингах (MMD, C2ST) и анализ качества
 разметки воспроизводятся исполненным ноутбуком `notebooks/01_data_quality.ipynb`.
 
-### 8. Проверка артефактов
+### 8. Воспроизведение метрик устойчивости ПР2
+
+```bash
+python scripts/reproduce_pr2.py
+# ожидается: M(0) = 0.983333, 20 проверок R(s)/ΔM/R_rel и 4 проверки R-AUC, RESULT: PASS
+```
+
+Программа не требует модели: она восстанавливает R(s), ΔM(s), R_rel(s) и R-AUC из
+сохранённой поэкземплярной правильности (`results/pr2/correctness.pkl`) и сравнивает
+с `results/pr2/summary_table.tsv` и `results/pr2/rauc.csv`. Bootstrap-интервалы
+(иерархический/парный bootstrap, B = 2000, percentile + BCa) воспроизводятся ноутбуком
+`notebooks/02_corruption_robustness.ipynb`, для которого нужны чекпойнт и данные;
+итоговые кривые — в `figures/pr2/robustness_curves.png`.
+
+### 9. Проверка артефактов
 
 Все артефакты в `results/` получены исполненными ноутбуками; `results/pr1/checksums.sha256`
-содержит контрольные суммы файлов ПР1. Сравните вывод программ с сохранёнными JSON/CSV.
+содержит контрольные суммы файлов ПР1, а `results/pr2/checksums.sha256` — файлов ПР2
+и унаследованных артефактов предварительного этапа. Сравните вывод программ с
+сохранёнными JSON/CSV.

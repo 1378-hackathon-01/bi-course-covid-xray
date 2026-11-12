@@ -26,8 +26,9 @@ A consolidated final report (§6) closes the cycle.
 
 This repository contains the **preliminary stage** (seven foundation steps of §1:
 task and context, dataset, modalities, splits, architecture and baseline training, primary
-metric, full fixation of experimental parameters) and **Practical Work №1** (§2).
-Practical works 2–4 and the final report are represented by placeholder folders with
+metric, full fixation of experimental parameters), **Practical Work №1** (§2) and
+**Practical Work №2** (§3).
+Practical works 3–4 and the final report are represented by placeholder folders with
 their planned scope; they will be added without restructuring the repository.
 
 ## Why the baseline is frozen

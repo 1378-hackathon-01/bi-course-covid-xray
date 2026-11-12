@@ -5,9 +5,10 @@
 «Безопасность и доверенность систем искусственного интеллекта».
 
 В репозитории представлены **завершённый предварительный этап** (раздел 1 методических
-рекомендаций) и **практическая работа №1 — исследование качества набора данных**
-(раздел 2). Практические работы ПР2, ПР3 и ПР4 представлены заглушками: их можно добавить
-без перестройки структуры.
+рекомендаций), **практическая работа №1 — исследование качества набора данных**
+(раздел 2) и **практическая работа №2 — устойчивость к искажениям** (раздел 3).
+Практические работы ПР3 и ПР4 представлены заглушками: их можно добавить без перестройки
+структуры.
 
 ---
 
@@ -45,8 +46,12 @@
    валидность, уникальность, утечка train↔test, баланс, качество разметки (Confident
    Learning), репрезентативность (MMD + C2ST) и аномалии изображений (BRISQUE, NIQE,
    размытие, рамки).
+3. **ПР2 (раздел 3)** — устойчивость замороженной модели к искажениям: четыре типа
+   (гауссов шум, пуассонов шум, гауссово размытие, JPEG) на пяти ненулевых уровнях
+   интенсивности, кривые устойчивости R(s) с 95%-ми интервалами, ΔM(s), R_rel(s) и
+   R-AUC с bootstrap-интервалами (percentile и BCa).
 
-**Что не включено (пока):** результаты ПР2, ПР3, ПР4 и итоговый сводный отчёт. Для них
+**Что не включено (пока):** результаты ПР3, ПР4 и итоговый сводный отчёт. Для них
 созданы папки-заглушки, чтобы будущая работа не требовала переименований и перемещений.
 Сам набор данных, PDF-методички курса и исходное демонстрационное приложение здесь **не
 распространяются**.
@@ -73,19 +78,21 @@ BI-COURSE-REPO/
 │   ├── data/                       # dataset listing/loading + transforms
 │   ├── models/                     # ResNet-18 architecture + frozen loader
 │   └── utils/                      # seed, metrics (Wilson/bootstrap), I/O helpers
-├── notebooks/                      # 00_train_baseline.ipynb, 01_data_quality.ipynb
-├── configs/                        # preliminary_config.yaml, pr1_config.yaml
+├── notebooks/                      # 00_train_baseline.ipynb, 01_data_quality.ipynb,
+│                                   # 02_corruption_robustness.ipynb
+├── configs/                        # preliminary_config.yaml, pr1_config.yaml, pr2_config.yaml
 ├── results/
 │   ├── preliminary/                # metrics.json, training_history.json, split_indices.json, latency
-│   └── pr1/                        # metrics_pr1.json, quality_profile.csv, label_inspection.csv, ...
-├── reports/                        # БИИ_preliminary (+ simple) и БИИ_PR1 (pdf|docx)
-├── figures/                        # preliminary/ (empty for now), pr1/ (300-dpi PNGs)
-├── scripts/                        # reproduce_preliminary.py, reproduce_pr1.py, latency tool
+│   ├── pr1/                        # metrics_pr1.json, quality_profile.csv, label_inspection.csv, ...
+│   └── pr2/                        # metrics_pr2.json, summary_table.tsv, rauc.csv, correctness.pkl
+├── reports/                        # БИИ_preliminary (+ simple), БИИ_PR1 и БИИ_PR2 (pdf|docx)
+├── figures/                        # preliminary/ (пусто), pr1/ и pr2/ (300-dpi PNG)
+├── scripts/                        # reproduce_preliminary.py, reproduce_pr1.py, reproduce_pr2.py, latency tool
 ├── tests/                          # pytest smoke tests (data, model, metrics)
-├── PR2/                            # placeholder: Corruption Robustness (TODO)
-├── PR3/                            # placeholder: Adversarial Robustness (TODO)
-├── PR4/                            # placeholder: Privacy / MIA (TODO)
-└── final_report/                   # placeholder: consolidated report (TODO after PR4)
+├── PR2/                            # описание ПР2 (завершено)
+├── PR3/                            # заглушка: Adversarial Robustness (TODO)
+├── PR4/                            # заглушка: Privacy / MIA (TODO)
+└── final_report/                   # заглушка: сводный отчёт (TODO после ПР4)
 ```
 
 ## 5. Ключевые результаты
@@ -117,6 +124,23 @@ BI-COURSE-REPO/
 | Средние NIQE/BRISQUE | NIQE COVID 6.52 [6.31; 6.76] / Normal 5.91 [5.80; 6.02]; BRISQUE 29.06 / 29.73 |
 | Аномалии | NIQE-выбросы 2.22% [0.61; 7.74]%; чрезмерно размытые 2.50% [2.16; 2.89]% |
 
+**ПР2 (устойчивость к искажениям).** R-AUC замороженной модели по типам искажений
+(4 типа × 5 ненулевых уровней, `0 = s0 < s1 < … < s5`):
+
+| Искажение | R-AUC | 95% ДИ (percentile) | 95% ДИ (BCa) | Ранг |
+|---|---|---|---|---|
+| JPEG-компрессия | 0.8218 | [0.8017; 0.8404] | [0.8012; 0.8381] | 1 |
+| Гауссово размытие | 0.7876 | [0.7699; 0.8036] | [0.7698; 0.8039] | 2 |
+| Гауссов шум | 0.6252 | [0.5958; 0.6527] | [0.5959; 0.6515] | 3 |
+| Пуассонов шум | 0.5600 | [0.5266; 0.5913] | [0.5269; 0.5920] | 4 |
+
+Первое статистически значимое падение (95% ДИ парного bootstrap для ΔM не содержит 0)
+наступает уже на минимальном уровне: гауссов шум (σ = 0.005, R = 0.8181,
+ΔM = 0.1653 [0.1375; 0.1944]), пуассонов шум (λ = 2048, R = 0.5472,
+ΔM = 0.4361 [0.4014; 0.4750]), размытие (σ_px = 1, R = 0.9611, ΔM = 0.0222
+[0.0083; 0.0375]) и JPEG (q = 90, R = 0.9694, ΔM = 0.0139 [0.0027; 0.0278]).
+Полный коллапс (R(s) < 0.55) достигается при σ ≥ 0.02, λ ≤ 2048, σ_px ≥ 3.5 и q = 15.
+
 **Как это понимать.** Данные сбалансированы и репрезентативны (сдвига нет, шум меток
 пренебрежимо мал), что делает Accuracy корректной основной метрикой и обосновывает
 измерение кривых устойчивости на этом тесте. В то же время 3.64% пиксельно подтверждённых
@@ -137,6 +161,7 @@ python -m pip install -r requirements.txt
 # Разместите данные в data/raw/{COVID,Normal} (см. data/README.md), затем:
 python scripts/reproduce_preliminary.py   # воспроизводит M(0) = 0.9833
 python scripts/reproduce_pr1.py           # воспроизводит ключевые метрики ПР1
+python scripts/reproduce_pr2.py           # воспроизводит R(s), ΔM и R-AUC ПР2 (без модели)
 ```
 
 Требования: Python 3.13, Git LFS, ~50 МБ под чекпойнт (плюс данные). Все числа получены
@@ -146,14 +171,17 @@ python scripts/reproduce_pr1.py           # воспроизводит ключ�
 
 Полная пошаговая процедура — в [`docs/reproduction_guide.md`](docs/reproduction_guide.md):
 предварительные требования, клонирование с LFS, получение данных, проверка SHA-256
-чекпойнта, воспроизведение базовой метрики и анализа ПР1, сверка с сохранёнными
-артефактами `results/`. Кратко:
+чекпойнта, воспроизведение базовой метрики, анализа ПР1 и метрик устойчивости ПР2,
+сверка с сохранёнными артефактами `results/`. Кратко:
 
 1. Установить зависимости из `requirements.txt`.
 2. Скачать данные и собрать `data/raw/{COVID,Normal}` (по 3600 снимков на класс).
 3. Применить точные индексы сплитов из `results/preliminary/split_indices.json`.
 4. Загрузить `models/baseline_model.pt` и убедиться, что M(0) = 0.9833 [0.9711; 0.9904].
 5. Запустить `scripts/reproduce_pr1.py` и сверить с `results/pr1/metrics_pr1.json`.
+6. Запустить `scripts/reproduce_pr2.py` и сверить с `results/pr2/summary_table.tsv`
+   и `results/pr2/rauc.csv`; полная кривая с bootstrap-интервалами воспроизводится
+   в `notebooks/02_corruption_robustness.ipynb` (нужны чекпойнт и данные).
 
 ## 8. Наборы данных
 
@@ -179,7 +207,7 @@ python scripts/reproduce_pr1.py           # воспроизводит ключ�
 ## 11. История изменений
 
 История ведётся по *Keep a Changelog* — см. [`CHANGELOG.md`](CHANGELOG.md).
-Текущая версия: **1.0.0** (предварительный этап + ПР1).
+Текущая версия: **1.1.0** (предварительный этап + ПР1 + ПР2).
 
 ## 12. План развития
 
@@ -187,7 +215,7 @@ python scripts/reproduce_pr1.py           # воспроизводит ключ�
 |---|---|---|
 | Предварительный | Базовая модель, данные, сплиты, метрика, фиксация | **готово** |
 | ПР1 | Исследование качества данных (раздел 2) | **готово** |
-| ПР2 | Устойчивость к естественным искажениям, R(s), R-AUC | план — `PR2/` |
+| ПР2 | Устойчивость к естественным искажениям, R(s), R-AUC | **готово** — `PR2/` |
 | ПР3 | Состязательная устойчивость (FGSM/PGD + контрольная атака), ASR, R-AUC_ε | план — `PR3/` |
 | ПР4 | Приватность: Membership Inference Attack (ROC-AUC, TPR@FPR, разрыв) | план — `PR4/` |
 | Итог | Сводный отчёт по ПР1–ПР4 | план — `final_report/` |

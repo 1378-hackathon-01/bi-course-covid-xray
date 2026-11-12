@@ -1,0 +1,102 @@
+# Конфигурация ПР2 — коррупционная устойчивость замороженной модели.
+# Общие параметры (seed, модель, сплит) наследуются из configs/preliminary_config.yaml;
+# машиночитаемые результаты — в results/pr2/metrics_pr2.json (этот файл — его YAML-двойник).
+# Пути приведены к структуре репозитория; исходная версия — config_pr2.yaml пакета ПР2.
+pr2:
+  reference:
+    preliminary: configs/preliminary_config.yaml
+    canonical: results/pr2/metrics_pr2.json
+  random_seed: 42
+  model:
+    architecture: ResNet18 (torchvision)
+    head: Sequential(Dropout(0.5), Linear(512, 2))
+    checkpoint: models/baseline_model.pt
+    checkpoint_sha256: 0ba793cb43d0f058af66673a1026e6eef4bd898d98cae05eaf6694cb20b504f0
+    checkpoint_bytes: 44789835
+    frozen: true
+    retrained: false
+    device: cuda
+    eval_transform: Resize(224,224) -> ToTensor -> Normalize(ImageNet mean/std)
+  data:
+    source: COVID-19 Radiography Database v4
+    test_n: 720
+    test_covid: 361
+    test_normal: 359
+    imbalance_ratio: 0.99446
+    split: 5760/720/720
+    split_seed: 42
+    split_indices: results/preliminary/split_indices.json
+    native_resolution: 299x299
+    model_input: 224x224
+  protocol:
+    clean_level: 0
+    severity_levels: [1, 2, 3, 4, 5]
+    stochastic_corruptions: [gaussian_noise, poisson_noise]
+    deterministic_corruptions: [gaussian_blur, jpeg]
+    stochastic_repeats: 5
+    deterministic_repeats: 1
+    total_runs: 60
+    predictions_corrupted: 43200
+    seed_rule: 'CRC32("<corruption>|<severity>|<repetition>")'
+    chunk_size: 96
+  corruption_grid:
+    gaussian_noise:
+      parameter: sigma
+      values: [0.005, 0.01, 0.02, 0.04, 0.08]
+      domain: сенсорный шум детектора, электроника
+      repeats: 5
+    poisson_noise:
+      parameter: lambda
+      values: [2048.0, 1024.0, 512.0, 256.0, 128.0]
+      domain: квантовый шум при малой дозе
+      repeats: 5
+    gaussian_blur:
+      parameter: sigma_px
+      values: [0.5, 1.0, 2.0, 3.5, 5.0]
+      domain: движение пациента, расфокусировка
+      repeats: 1
+    jpeg:
+      parameter: quality
+      values: [90, 70, 50, 30, 15]
+      domain: сжатие при сохранении/передаче DICOM-JPEG
+      repeats: 1
+  metrics:
+    primary: accuracy
+    baseline_M0: 0.9833333333333333
+    baseline_ci95_wilson: [0.9710958188034222, 0.9904407048628867]
+    baseline_confusion: {tp: 354, fn: 7, fp: 5, tn: 354}
+    delta_M: M(0) - R(s)
+    relative: R(s) / M(0)
+    rauc_weights: [0.1, 0.2, 0.2, 0.2, 0.2, 0.1]
+    rauc_grid: [0, 1, 2, 3, 4, 5]
+  bootstrap:
+    B: 2000
+    confidence: 0.95
+    seed: 42
+    R_s: иерархический bootstrap (объект × реализация) для стохастических; по объектам для детерминированных
+    delta_M: парный bootstrap по объектам
+    R_AUC: percentile + BCa (scipy.stats.bootstrap); вся кривая восстанавливается на каждой перевыборке
+  results:
+    rauc:
+      gaussian_noise: 0.6252 [0.5958; 0.6527] (BCa [0.5959; 0.6515])
+      poisson_noise: 0.5600 [0.5266; 0.5913] (BCa [0.5269; 0.5920])
+      gaussian_blur: 0.7876 [0.7699; 0.8036] (BCa [0.7698; 0.8039])
+      jpeg: 0.8218 [0.8017; 0.8404] (BCa [0.8012; 0.8381])
+    first_significant_drop:
+      gaussian_noise: s = 1 (sigma = 0.005), R = 0.8181
+      poisson_noise: s = 1 (lambda = 2048.0), R = 0.5472
+      gaussian_blur: s = 2 (sigma_px = 1.0), R = 0.9611
+      jpeg: s = 1 (quality = 90), R = 0.9694
+    collapse_R_below_0_55:
+      gaussian_noise: s = 3 (sigma = 0.02), R = 0.5028
+      poisson_noise: s = 1 (lambda = 2048.0), R = 0.5472
+      gaussian_blur: s = 4 (sigma_px = 3.5), R = 0.5028
+      jpeg: s = 5 (quality = 15), R = 0.5458
+    best_rauc: jpeg (0.8218)
+    worst_rauc: poisson_noise (0.5600)
+  deviations:
+    deterministic_repeats: r = 1 для blur/JPEG; рекомендация §3.4 — r >= 5
+    noise_grid: сетка шума зафиксирована после пилотного прогона и начинается с мягких уровней; при этом уже первая точка показывает значимое падение
+    native_resolution: искажения применяются после Resize(224,224), а не к нативным 299x299
+    multiple_comparisons: поправка на 20 точек не применяется; интервалы точечные
+    clinical_validation: внешняя и проспективная валидация не выполнялись

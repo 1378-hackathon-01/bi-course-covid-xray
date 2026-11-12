@@ -1,0 +1,687 @@
+{
+  "task": "PR2 — Corruption Robustness",
+  "version": "V2",
+  "generated_at": "2026-11-01",
+  "source_artifacts": [
+    "pr2_summary.json",
+    "pr2_rauc.csv",
+    "pr2_correctness.pkl",
+    "PR2.ipynb"
+  ],
+  "model": {
+    "architecture": "ResNet18 (torchvision)",
+    "head": "Sequential(Dropout(0.5), Linear(512, 2))",
+    "checkpoint": "baseline_model.pt",
+    "checkpoint_sha256": "0ba793cb43d0f058af66673a1026e6eef4bd898d98cae05eaf6694cb20b504f0",
+    "checkpoint_bytes": 44789835,
+    "frozen": true,
+    "retrained": false,
+    "device": "cuda"
+  },
+  "data": {
+    "source": "COVID-19 Radiography Database v4",
+    "test_n": 720,
+    "test_covid": 361,
+    "test_normal": 359,
+    "imbalance_ratio": 0.99446,
+    "split": "5760/720/720",
+    "split_seed": 42,
+    "split_indices": "PRELIMINARY_SUBMISSION_V2/split_indices.json",
+    "native_resolution": "299x299",
+    "model_input": "224x224"
+  },
+  "protocol": {
+    "clean_level": 0,
+    "severity_levels": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "stochastic_corruptions": [
+      "gaussian_noise",
+      "poisson_noise"
+    ],
+    "deterministic_corruptions": [
+      "gaussian_blur",
+      "jpeg"
+    ],
+    "stochastic_repeats": 5,
+    "deterministic_repeats": 1,
+    "total_runs": 60,
+    "predictions_corrupted": 43200,
+    "seed_rule": "CRC32(\"<corruption>|<severity>|<repetition>\")",
+    "chunk_size": 96
+  },
+  "baseline": {
+    "metric": "accuracy",
+    "M0": 0.9833333333333333,
+    "M0_rounded": 0.9833,
+    "ci95_wilson": [
+      0.9710958188034222,
+      0.9904407048628867
+    ],
+    "confusion": {
+      "TP": 354,
+      "FN": 7,
+      "FP": 5,
+      "TN": 354
+    },
+    "reproduced_in_notebook": true
+  },
+  "bootstrap": {
+    "B": 2000,
+    "confidence": 0.95,
+    "seed": 42,
+    "R_s": "иерархический bootstrap (объект × реализация) для стохастических искажений; bootstrap по объектам для детерминированных",
+    "delta_M": "парный bootstrap по объектам (clean и corrupted на одних индексах)",
+    "R_AUC": "percentile + BCa (scipy.stats.bootstrap), вся кривая восстанавливается на каждой перевыборке"
+  },
+  "corruption_grid": {
+    "gaussian_noise": {
+      "parameter": "sigma",
+      "values": [
+        0.005,
+        0.01,
+        0.02,
+        0.04,
+        0.08
+      ],
+      "domain": "сенсорный шум детектора, электроника",
+      "repeats": 5
+    },
+    "poisson_noise": {
+      "parameter": "lambda",
+      "values": [
+        2048.0,
+        1024.0,
+        512.0,
+        256.0,
+        128.0
+      ],
+      "domain": "квантовый шум при малой дозе",
+      "repeats": 5
+    },
+    "gaussian_blur": {
+      "parameter": "sigma_px",
+      "values": [
+        0.5,
+        1.0,
+        2.0,
+        3.5,
+        5.0
+      ],
+      "domain": "движение пациента, расфокусировка",
+      "repeats": 1
+    },
+    "jpeg": {
+      "parameter": "quality",
+      "values": [
+        90,
+        70,
+        50,
+        30,
+        15
+      ],
+      "domain": "сжатие при сохранении/передаче DICOM-JPEG",
+      "repeats": 1
+    }
+  },
+  "results": [
+    {
+      "corruption": "gaussian_noise",
+      "corruption_ru": "Гауссов шум",
+      "severity": 1,
+      "parameter_name": "sigma",
+      "parameter_value": 0.005,
+      "R": 0.8180555555555555,
+      "R_ci95": [
+        0.7888888888888889,
+        0.8458333333333333
+      ],
+      "delta_M": 0.16527777777777775,
+      "delta_ci95": [
+        0.13749999999999996,
+        0.19444444444444442
+      ],
+      "R_rel": 0.8319209039548023,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_noise",
+      "corruption_ru": "Гауссов шум",
+      "severity": 2,
+      "parameter_name": "sigma",
+      "parameter_value": 0.01,
+      "R": 0.5613888888888888,
+      "R_ci95": [
+        0.525,
+        0.5972222222222222
+      ],
+      "delta_M": 0.42194444444444446,
+      "delta_ci95": [
+        0.38611111111111107,
+        0.45833333333333326
+      ],
+      "R_rel": 0.5709039548022599,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_noise",
+      "corruption_ru": "Гауссов шум",
+      "severity": 3,
+      "parameter_name": "sigma",
+      "parameter_value": 0.02,
+      "R": 0.5027777777777778,
+      "R_ci95": [
+        0.46524305555555556,
+        0.5388888888888889
+      ],
+      "delta_M": 0.4805555555555555,
+      "delta_ci95": [
+        0.4444444444444444,
+        0.5180902777777775
+      ],
+      "R_rel": 0.5112994350282486,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_noise",
+      "corruption_ru": "Гауссов шум",
+      "severity": 4,
+      "parameter_name": "sigma",
+      "parameter_value": 0.04,
+      "R": 0.5013888888888889,
+      "R_ci95": [
+        0.4625,
+        0.5375
+      ],
+      "delta_M": 0.4819444444444444,
+      "delta_ci95": [
+        0.4458333333333333,
+        0.5208333333333333
+      ],
+      "R_rel": 0.5098870056497176,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_noise",
+      "corruption_ru": "Гауссов шум",
+      "severity": 5,
+      "parameter_name": "sigma",
+      "parameter_value": 0.08,
+      "R": 0.5013888888888889,
+      "R_ci95": [
+        0.4625,
+        0.5375
+      ],
+      "delta_M": 0.4819444444444444,
+      "delta_ci95": [
+        0.4458333333333333,
+        0.5208333333333333
+      ],
+      "R_rel": 0.5098870056497176,
+      "significant": true
+    },
+    {
+      "corruption": "poisson_noise",
+      "corruption_ru": "Пуассоновский шум",
+      "severity": 1,
+      "parameter_name": "lambda",
+      "parameter_value": 2048.0,
+      "R": 0.5472222222222223,
+      "R_ci95": [
+        0.5083333333333333,
+        0.5819791666666665
+      ],
+      "delta_M": 0.436111111111111,
+      "delta_ci95": [
+        0.40135416666666657,
+        0.475
+      ],
+      "R_rel": 0.556497175141243,
+      "significant": true
+    },
+    {
+      "corruption": "poisson_noise",
+      "corruption_ru": "Пуассоновский шум",
+      "severity": 2,
+      "parameter_name": "lambda",
+      "parameter_value": 1024.0,
+      "R": 0.5077777777777778,
+      "R_ci95": [
+        0.46944444444444444,
+        0.5444444444444444
+      ],
+      "delta_M": 0.4755555555555555,
+      "delta_ci95": [
+        0.4388888888888889,
+        0.5138888888888888
+      ],
+      "R_rel": 0.5163841807909605,
+      "significant": true
+    },
+    {
+      "corruption": "poisson_noise",
+      "corruption_ru": "Пуассоновский шум",
+      "severity": 3,
+      "parameter_name": "lambda",
+      "parameter_value": 512.0,
+      "R": 0.5013888888888889,
+      "R_ci95": [
+        0.4625,
+        0.5375
+      ],
+      "delta_M": 0.4819444444444444,
+      "delta_ci95": [
+        0.4458333333333333,
+        0.5208333333333333
+      ],
+      "R_rel": 0.5098870056497176,
+      "significant": true
+    },
+    {
+      "corruption": "poisson_noise",
+      "corruption_ru": "Пуассоновский шум",
+      "severity": 4,
+      "parameter_name": "lambda",
+      "parameter_value": 256.0,
+      "R": 0.5013888888888889,
+      "R_ci95": [
+        0.4625,
+        0.5375
+      ],
+      "delta_M": 0.4819444444444444,
+      "delta_ci95": [
+        0.4458333333333333,
+        0.5208333333333333
+      ],
+      "R_rel": 0.5098870056497176,
+      "significant": true
+    },
+    {
+      "corruption": "poisson_noise",
+      "corruption_ru": "Пуассоновский шум",
+      "severity": 5,
+      "parameter_name": "lambda",
+      "parameter_value": 128.0,
+      "R": 0.5013888888888889,
+      "R_ci95": [
+        0.4625,
+        0.5375
+      ],
+      "delta_M": 0.4819444444444444,
+      "delta_ci95": [
+        0.4458333333333333,
+        0.5208333333333333
+      ],
+      "R_rel": 0.5098870056497176,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_blur",
+      "corruption_ru": "Гауссово размытие",
+      "severity": 1,
+      "parameter_name": "sigma_px",
+      "parameter_value": 0.5,
+      "R": 0.9819444444444444,
+      "R_ci95": [
+        0.9722222222222222,
+        0.9916666666666667
+      ],
+      "delta_M": 0.001388888888888884,
+      "delta_ci95": [
+        -0.008333333333333415,
+        0.011111111111111072
+      ],
+      "R_rel": 0.998587570621469,
+      "significant": false
+    },
+    {
+      "corruption": "gaussian_blur",
+      "corruption_ru": "Гауссово размытие",
+      "severity": 2,
+      "parameter_name": "sigma_px",
+      "parameter_value": 1.0,
+      "R": 0.9611111111111111,
+      "R_ci95": [
+        0.9458333333333333,
+        0.975
+      ],
+      "delta_M": 0.022222222222222143,
+      "delta_ci95": [
+        0.008333333333333304,
+        0.03749999999999998
+      ],
+      "R_rel": 0.9774011299435029,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_blur",
+      "corruption_ru": "Гауссово размытие",
+      "severity": 3,
+      "parameter_name": "sigma_px",
+      "parameter_value": 2.0,
+      "R": 0.75,
+      "R_ci95": [
+        0.7166666666666667,
+        0.7819444444444444
+      ],
+      "delta_M": 0.23333333333333328,
+      "delta_ci95": [
+        0.20138888888888884,
+        0.2666666666666666
+      ],
+      "R_rel": 0.7627118644067797,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_blur",
+      "corruption_ru": "Гауссово размытие",
+      "severity": 4,
+      "parameter_name": "sigma_px",
+      "parameter_value": 3.5,
+      "R": 0.5027777777777778,
+      "R_ci95": [
+        0.46524305555555556,
+        0.5388888888888889
+      ],
+      "delta_M": 0.4805555555555555,
+      "delta_ci95": [
+        0.4444444444444444,
+        0.5180902777777775
+      ],
+      "R_rel": 0.5112994350282486,
+      "significant": true
+    },
+    {
+      "corruption": "gaussian_blur",
+      "corruption_ru": "Гауссово размытие",
+      "severity": 5,
+      "parameter_name": "sigma_px",
+      "parameter_value": 5.0,
+      "R": 0.5013888888888889,
+      "R_ci95": [
+        0.4625,
+        0.5375
+      ],
+      "delta_M": 0.4819444444444444,
+      "delta_ci95": [
+        0.4458333333333333,
+        0.5208333333333333
+      ],
+      "R_rel": 0.5098870056497176,
+      "significant": true
+    },
+    {
+      "corruption": "jpeg",
+      "corruption_ru": "JPEG-компрессия",
+      "severity": 1,
+      "parameter_name": "quality",
+      "parameter_value": 90,
+      "R": 0.9694444444444444,
+      "R_ci95": [
+        0.9555555555555556,
+        0.9805902777777775
+      ],
+      "delta_M": 0.01388888888888884,
+      "delta_ci95": [
+        0.0027430555555555476,
+        0.02777777777777768
+      ],
+      "R_rel": 0.9858757062146893,
+      "significant": true
+    },
+    {
+      "corruption": "jpeg",
+      "corruption_ru": "JPEG-компрессия",
+      "severity": 2,
+      "parameter_name": "quality",
+      "parameter_value": 70,
+      "R": 0.8930555555555556,
+      "R_ci95": [
+        0.8694444444444445,
+        0.9152777777777777
+      ],
+      "delta_M": 0.09027777777777768,
+      "delta_ci95": [
+        0.06805555555555554,
+        0.11388888888888882
+      ],
+      "R_rel": 0.9081920903954803,
+      "significant": true
+    },
+    {
+      "corruption": "jpeg",
+      "corruption_ru": "JPEG-компрессия",
+      "severity": 3,
+      "parameter_name": "quality",
+      "parameter_value": 50,
+      "R": 0.8027777777777778,
+      "R_ci95": [
+        0.7722222222222223,
+        0.8305555555555556
+      ],
+      "delta_M": 0.18055555555555547,
+      "delta_ci95": [
+        0.15277777777777768,
+        0.21111111111111103
+      ],
+      "R_rel": 0.8163841807909605,
+      "significant": true
+    },
+    {
+      "corruption": "jpeg",
+      "corruption_ru": "JPEG-компрессия",
+      "severity": 4,
+      "parameter_name": "quality",
+      "parameter_value": 30,
+      "R": 0.6791666666666667,
+      "R_ci95": [
+        0.6416666666666667,
+        0.7138888888888889
+      ],
+      "delta_M": 0.3041666666666666,
+      "delta_ci95": [
+        0.2694444444444444,
+        0.34166666666666656
+      ],
+      "R_rel": 0.690677966101695,
+      "significant": true
+    },
+    {
+      "corruption": "jpeg",
+      "corruption_ru": "JPEG-компрессия",
+      "severity": 5,
+      "parameter_name": "quality",
+      "parameter_value": 15,
+      "R": 0.5458333333333333,
+      "R_ci95": [
+        0.5069444444444444,
+        0.5819444444444445
+      ],
+      "delta_M": 0.4375,
+      "delta_ci95": [
+        0.4013888888888888,
+        0.47638888888888886
+      ],
+      "R_rel": 0.5550847457627118,
+      "significant": true
+    }
+  ],
+  "rauc": [
+    {
+      "corruption": "gaussian_noise",
+      "corruption_ru": "Гауссов шум",
+      "R_AUC": 0.6251944444444444,
+      "ci95_percentile": [
+        0.5957777777777776,
+        0.6526972222222222
+      ],
+      "ci95_bca": [
+        0.5959450729632595,
+        0.651499802534903
+      ],
+      "drop_pct_at_severity_5": 49.01129943502824
+    },
+    {
+      "corruption": "poisson_noise",
+      "corruption_ru": "Пуассоновский шум",
+      "R_AUC": 0.5600277777777777,
+      "ci95_percentile": [
+        0.5266388888888888,
+        0.5913347222222222
+      ],
+      "ci95_bca": [
+        0.5268844927819295,
+        0.5920277777777778
+      ],
+      "drop_pct_at_severity_5": 49.01129943502824
+    },
+    {
+      "corruption": "gaussian_blur",
+      "corruption_ru": "Гауссово размытие",
+      "R_AUC": 0.7876388888888888,
+      "ci95_percentile": [
+        0.7698576388888888,
+        0.8036180555555555
+      ],
+      "ci95_bca": [
+        0.7697578644612242,
+        0.8038888888888889
+      ],
+      "drop_pct_at_severity_5": 49.01129943502824
+    },
+    {
+      "corruption": "jpeg",
+      "corruption_ru": "JPEG-компрессия",
+      "R_AUC": 0.8218055555555555,
+      "ci95_percentile": [
+        0.8016666666666665,
+        0.8404236111111111
+      ],
+      "ci95_bca": [
+        0.8012499999999999,
+        0.8380555555555556
+      ],
+      "drop_pct_at_severity_5": 44.49152542372882
+    }
+  ],
+  "summary": {
+    "first_significant_drop": {
+      "gaussian_noise": {
+        "severity": 1,
+        "parameter_name": "sigma",
+        "parameter_value": 0.005,
+        "R": 0.8180555555555555,
+        "delta_M": 0.16527777777777775,
+        "delta_ci95": [
+          0.13749999999999996,
+          0.19444444444444442
+        ]
+      },
+      "poisson_noise": {
+        "severity": 1,
+        "parameter_name": "lambda",
+        "parameter_value": 2048.0,
+        "R": 0.5472222222222223,
+        "delta_M": 0.436111111111111,
+        "delta_ci95": [
+          0.40135416666666657,
+          0.475
+        ]
+      },
+      "gaussian_blur": {
+        "severity": 2,
+        "parameter_name": "sigma_px",
+        "parameter_value": 1.0,
+        "R": 0.9611111111111111,
+        "delta_M": 0.022222222222222143,
+        "delta_ci95": [
+          0.008333333333333304,
+          0.03749999999999998
+        ]
+      },
+      "jpeg": {
+        "severity": 1,
+        "parameter_name": "quality",
+        "parameter_value": 90,
+        "R": 0.9694444444444444,
+        "delta_M": 0.01388888888888884,
+        "delta_ci95": [
+          0.0027430555555555476,
+          0.02777777777777768
+        ]
+      }
+    },
+    "collapse_R_below_0_55": {
+      "gaussian_noise": {
+        "severity": 3,
+        "parameter_name": "sigma",
+        "parameter_value": 0.02,
+        "R": 0.5027777777777778
+      },
+      "poisson_noise": {
+        "severity": 1,
+        "parameter_name": "lambda",
+        "parameter_value": 2048.0,
+        "R": 0.5472222222222223
+      },
+      "gaussian_blur": {
+        "severity": 4,
+        "parameter_name": "sigma_px",
+        "parameter_value": 3.5,
+        "R": 0.5027777777777778
+      },
+      "jpeg": {
+        "severity": 5,
+        "parameter_name": "quality",
+        "parameter_value": 15,
+        "R": 0.5458333333333333
+      }
+    },
+    "best_rauc": {
+      "corruption": "jpeg",
+      "R_AUC": 0.8218055555555555,
+      "ci95_percentile": [
+        0.8016666666666665,
+        0.8404236111111111
+      ]
+    },
+    "worst_rauc": {
+      "corruption": "poisson_noise",
+      "R_AUC": 0.5600277777777777,
+      "ci95_percentile": [
+        0.5266388888888888,
+        0.5913347222222222
+      ]
+    }
+  },
+  "verification": {
+    "notebook_cells": 9,
+    "code_cells": 7,
+    "markdown_cells": 2,
+    "executed": true,
+    "execution_counts": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "errors": 0,
+    "unexecuted": 0,
+    "embedded_images": 2,
+    "baseline_check": "np.isclose(m_clean, M0, atol=1e-9)",
+    "main_run_seconds": 246,
+    "inherited_files_sha256": {
+      "baseline_model.pt": "0ba793cb43d0f058af66673a1026e6eef4bd898d98cae05eaf6694cb20b504f0",
+      "training_history.json": "18743f1e799f94b0e862c6cecf6067ed147bf41c5b99f8f643d709f3e8569cfc",
+      "dataset_source.md": "2b542c08cba52dec0d8c777b968edc3c4086b3f775ca488b52002cb89f54a7b0",
+      "requirements.txt": "7113f58ecbf1fda53dbbc3db46324c592622efb7e4db2607c57d9990bdb7ff0a"
+    }
+  }
+}

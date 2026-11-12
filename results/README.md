@@ -19,10 +19,27 @@
 | `inference_latency.json` | Copy of the latency measurement (identical content). |
 | `checksums.sha256` | Internal checksums of the PR1 submission artifacts. |
 
+## `pr2/`
+
+| File | Contents |
+|---|---|
+| `metrics_pr2.json` | Machine-readable PR2 results, kept verbatim from the PR2 bundle: task/version, model and checkpoint identity, data, protocol (severities, repeats, total runs), corruption grid, baseline, bootstrap settings, per-level results, R-AUC with percentile/BCa CIs, summary and verification block. |
+| `summary.json` | Compact summary: baseline M(0), per-corruption curves, ΔM, R_rel, R-AUC, first significant drop, collapse levels. |
+| `summary_table.tsv` | The 20-row table behind §5 of the report: corruption, severity, R(s), ΔM, R_rel with their 95 % interval bounds. |
+| `rauc.csv` | R-AUC per corruption type (point estimate, percentile and BCa intervals). |
+| `correctness.pkl` | Per-object, per-realization correctness matrix of the frozen model for the clean test set and all 20 (corruption, severity) cells — the input of `scripts/reproduce_pr2.py`. |
+| `checksums.sha256` | Checksums of the PR2 artifacts plus the inherited preliminary files and `models/baseline_model.pt`. |
+
 ## Provenance
 
 All numbers were produced by the executed notebooks in `notebooks/` and are consistent with
 the reports in `reports/`. The PR1 files were verified against the executed notebook during
 an independent internal audit; `quality_profile.csv` rows for anomalies carry Wilson
 intervals recomputed from the actual counts (NIQE: 2/90 = 2.22% [0.61; 7.74]%;
-blur: 180/7200 = 2.50% [2.16; 2.89]%).
+blur: 180/7200 = 2.50% [2.16; 2.89]%). The PR2 point estimates (20 R(s)/ΔM/R_rel values
+and 4 R-AUC values) are re-derived from `pr2/correctness.pkl` by
+`scripts/reproduce_pr2.py`, which reports `RESULT: PASS`; the bootstrap intervals are
+reproduced by `notebooks/02_corruption_robustness.ipynb`.
+`metrics_pr2.json` keeps the submission-relative path strings of the original PR2 bundle
+(e.g. `PR2.ipynb`, `PRELIMINARY_SUBMISSION_V2/split_indices.json`); the repository-local
+equivalents are listed in `configs/pr2_config.yaml`.

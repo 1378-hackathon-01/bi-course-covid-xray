@@ -10,20 +10,20 @@
 
 ## How the documentation is organised
 
-The repository documents two completed stages of the practical cycle: the preliminary
-stage (methodology §1) and Practical Work №1 (methodology §2). Every claim in the
-documentation is backed by a machine-readable artifact: configuration (`configs/`), metrics
-(`results/`), reports (`reports/`) or figures (`figures/`). This layout means a reader can
-verify a number without re-running any code, and a reviewer can reproduce it end-to-end
-using the programs in `scripts/`.
+The repository documents three completed stages of the practical cycle: the preliminary
+stage (methodology §1), Practical Work №1 (methodology §2) and Practical Work №2
+(methodology §3). Every claim in the documentation is backed by a machine-readable
+artifact: configuration (`configs/`), metrics (`results/`), reports (`reports/`) or
+figures (`figures/`). This layout means a reader can verify a number without re-running
+any code, and a reviewer can reproduce it end-to-end using the programs in `scripts/`.
 
 ## Where to start
 
 1. Read the top-level `README.md` for context and key results.
 2. Open `reports/БИИ_preliminary.pdf` for the full Russian-language report (a single
    cumulative document that starts with the preliminary stage and is extended as each
-   practical work is completed). The standalone report for practical work 1 is
-   `reports/БИИ_PR1.pdf`.
+   practical work is completed). The standalone reports for practical works 1 and 2 are
+   `reports/БИИ_PR1.pdf` and `reports/БИИ_PR2.pdf`.
 3. Follow `reproduction_guide.md` to rebuild the numbers locally.
 4. Inspect `results/` for the exact values with confidence intervals.
 
@@ -33,4 +33,5 @@ using the programs in `scripts/`.
   code, docstrings and this documentation are in English.
 - All confidence intervals are 95%: Wilson for proportions, percentile bootstrap
   (B = 2000) for means and non-linear metrics, permutation p-values for MMD.
+  For R-AUC both percentile and BCa bootstrap intervals are reported (PR2).
 - The baseline checkpoint is frozen: no script in this repository ever trains it.

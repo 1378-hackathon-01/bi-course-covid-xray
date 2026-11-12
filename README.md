@@ -5,9 +5,10 @@ studied through the practical cycle of the course
 «Безопасность и доверенность систем искусственного интеллекта»
 (*Security and Trustworthiness of Artificial Intelligence Systems*).
 
-This repository contains the **completed preliminary stage** (methodology §1) and
-**Practical Work №1 — Data Quality Investigation** (methodology §2). Practical works
-PR2, PR3 and PR4 are represented by placeholders and will be added without restructuring.
+This repository contains the **completed preliminary stage** (methodology §1),
+**Practical Work №1 — Data Quality Investigation** (methodology §2) and
+**Practical Work №2 — Corruption Robustness** (methodology §3). Practical works
+PR3 and PR4 are represented by placeholders and will be added without restructuring.
 
 ---
 
@@ -43,8 +44,12 @@ attributable to the studied effect rather than to retraining.
 2. **PR1 (§2)** — a quantitative, multidimensional data-quality profile: completeness,
    validity, uniqueness, train↔test leakage, balance, label quality (Confident Learning),
    representativeness (MMD + C2ST) and image anomalies (BRISQUE, NIQE, blur, borders).
+3. **PR2 (§3)** — corruption robustness of the frozen model: four corruption types
+   (Gaussian noise, Poisson noise, Gaussian blur, JPEG) at five non-zero severity
+   levels, robustness curves R(s) with 95 % intervals, ΔM(s), R_rel(s) and R-AUC
+   with percentile/BCa bootstrap intervals.
 
-**What is not included (yet):** PR2, PR3, PR4 results and the final consolidated report.
+**What is not included (yet):** PR3 and PR4 results and the final consolidated report.
 Their folders exist as placeholders so that future work does not require renaming or
 moving any file. The dataset itself, the course PDFs and the original demo application
 are **not** redistributed here.
@@ -71,16 +76,18 @@ BI-COURSE-REPO/
 │   ├── data/                       # dataset listing/loading + transforms
 │   ├── models/                     # ResNet-18 architecture + frozen loader
 │   └── utils/                      # seed, metrics (Wilson/bootstrap), I/O helpers
-├── notebooks/                      # 00_train_baseline.ipynb, 01_data_quality.ipynb
-├── configs/                        # preliminary_config.yaml, pr1_config.yaml
+├── notebooks/                      # 00_train_baseline.ipynb, 01_data_quality.ipynb,
+│                                   # 02_corruption_robustness.ipynb
+├── configs/                        # preliminary_config.yaml, pr1_config.yaml, pr2_config.yaml
 ├── results/
 │   ├── preliminary/                # metrics.json, training_history.json, split_indices.json, latency
-│   └── pr1/                        # metrics_pr1.json, quality_profile.csv, label_inspection.csv, ...
-├── reports/                        # БИИ_preliminary (+ simple) and БИИ_PR1 (pdf|docx)
-├── figures/                        # preliminary/ (empty for now), pr1/ (300-dpi PNGs)
-├── scripts/                        # reproduce_preliminary.py, reproduce_pr1.py, latency tool
+│   ├── pr1/                        # metrics_pr1.json, quality_profile.csv, label_inspection.csv, ...
+│   └── pr2/                        # metrics_pr2.json, summary_table.tsv, rauc.csv, correctness.pkl
+├── reports/                        # БИИ_preliminary (+ simple), БИИ_PR1 and БИИ_PR2 (pdf|docx)
+├── figures/                        # preliminary/ (empty), pr1/ and pr2/ (300-dpi PNGs)
+├── scripts/                        # reproduce_preliminary.py, reproduce_pr1.py, reproduce_pr2.py, latency tool
 ├── tests/                          # pytest smoke tests (data, model, metrics)
-├── PR2/                            # placeholder: Corruption Robustness (TODO)
+├── PR2/                            # PR2 description (complete)
 ├── PR3/                            # placeholder: Adversarial Robustness (TODO)
 ├── PR4/                            # placeholder: Privacy / MIA (TODO)
 └── final_report/                   # placeholder: consolidated report (TODO after PR4)
@@ -115,6 +122,23 @@ best epoch 15 (validation accuracy 0.9917). On the unmodified test set (720 imag
 | Image quality means | NIQE COVID 6.52 [6.31; 6.76] / Normal 5.91 [5.80; 6.02]; BRISQUE 29.06 / 29.73 |
 | Anomalies | NIQE outliers 2.22% [0.61; 7.74]%; excessively blurred 2.50% [2.16; 2.89]% |
 
+**PR2 (corruption robustness).** R-AUC of the frozen model per corruption
+(4 types × 5 non-zero severity levels, `0 = s0 < s1 < … < s5`):
+
+| Corruption | R-AUC | 95% CI (percentile) | 95% CI (BCa) | Rank |
+|---|---|---|---|---|
+| JPEG compression | 0.8218 | [0.8017; 0.8404] | [0.8012; 0.8381] | 1 |
+| Gaussian blur | 0.7876 | [0.7699; 0.8036] | [0.7698; 0.8039] | 2 |
+| Gaussian noise | 0.6252 | [0.5958; 0.6527] | [0.5959; 0.6515] | 3 |
+| Poisson noise | 0.5600 | [0.5266; 0.5913] | [0.5269; 0.5920] | 4 |
+
+The first statistically significant drop (paired-bootstrap 95 % CI of ΔM excludes 0)
+occurs at the lowest level for Gaussian noise (σ = 0.005, R = 0.8181,
+ΔM = 0.1653 [0.1375; 0.1944]), Poisson noise (λ = 2048, R = 0.5472,
+ΔM = 0.4361 [0.4014; 0.4750]), blur (σ_px = 1, R = 0.9611, ΔM = 0.0222
+[0.0083; 0.0375]) and JPEG (q = 90, R = 0.9694, ΔM = 0.0139 [0.0027; 0.0278]).
+Collapse (R(s) < 0.55) is reached at σ ≥ 0.02, λ ≤ 2048, σ_px ≥ 3.5 and q = 15.
+
 **What these results mean.** The dataset is balanced and representative (no distribution
 shift, negligible label noise), which makes Accuracy a valid primary metric and justifies
 measuring robustness curves on this test set. At the same time, 3.64% pixel-confirmed near
@@ -135,6 +159,7 @@ python -m pip install -r requirements.txt
 # Put the dataset into data/raw/{COVID,Normal} (see data/README.md), then:
 python scripts/reproduce_preliminary.py   # reproduces M(0) = 0.9833
 python scripts/reproduce_pr1.py           # reproduces PR1 core metrics
+python scripts/reproduce_pr2.py           # reproduces PR2 R(s), ΔM and R-AUC (no model needed)
 ```
 
 Requirements: Python 3.13, Git LFS, ~50 MB of disk for the checkpoint (plus the dataset).
@@ -145,14 +170,17 @@ All reported numbers were obtained on CPU/GPU as documented; inference also work
 
 See [`docs/reproduction_guide.md`](docs/reproduction_guide.md) for the full step-by-step
 procedure: prerequisites, LFS clone, dataset acquisition, checkpoint SHA-256 verification,
-reproduction of the baseline metric and of the PR1 analysis, and verification against the
-stored `results/` artifacts. A condensed version:
+reproduction of the baseline metric, of the PR1 analysis and of the PR2 robustness
+metrics, and verification against the stored `results/` artifacts. A condensed version:
 
 1. Install dependencies from `requirements.txt`.
 2. Download the dataset and build `data/raw/{COVID,Normal}` (3600 images per class).
 3. Apply the exact splits from `results/preliminary/split_indices.json`.
 4. Load `models/baseline_model.pt` and confirm M(0) = 0.9833 [0.9711; 0.9904].
 5. Run `scripts/reproduce_pr1.py` and compare with `results/pr1/metrics_pr1.json`.
+6. Run `scripts/reproduce_pr2.py` and compare with `results/pr2/summary_table.tsv`
+   and `results/pr2/rauc.csv`; the full curve with bootstrap intervals is reproduced
+   by `notebooks/02_corruption_robustness.ipynb` (needs the checkpoint and the dataset).
 
 ## 8. Datasets
 
@@ -179,7 +207,7 @@ address after publishing.
 ## 11. Changelog
 
 Version history follows *Keep a Changelog* — see [`CHANGELOG.md`](CHANGELOG.md).
-Current version: **1.0.0** (preliminary stage + PR1).
+Current version: **1.1.0** (preliminary stage + PR1 + PR2).
 
 ## 12. Roadmap
 
@@ -187,7 +215,7 @@ Current version: **1.0.0** (preliminary stage + PR1).
 |---|---|---|
 | Preliminary | Baseline model, dataset, splits, primary metric, fixation | **done** |
 | PR1 | Data quality investigation (§2) | **done** |
-| PR2 | Robustness to natural corruptions (noise, blur, JPEG), R(s), R-AUC | planned — `PR2/` |
+| PR2 | Robustness to natural corruptions (noise, blur, JPEG), R(s), R-AUC | **done** — `PR2/` |
 | PR3 | Adversarial robustness (white-box FGSM/PGD + sanity attack), ASR, R-AUC_ε | planned — `PR3/` |
 | PR4 | Privacy: Membership Inference Attack (ROC-AUC, TPR@FPR, gap) | planned — `PR4/` |
 | Final | Consolidated report across PR1–PR4 | planned — `final_report/` |

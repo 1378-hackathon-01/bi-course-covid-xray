@@ -6,12 +6,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), adheres to
 
 ## [Unreleased]
 
+### Planned
+
+- PR3: Adversarial Robustness (white-box: FGSM, PGD, AutoAttack sanity check).
+- PR4: Privacy — Membership Inference Attack (ROC-AUC, TPR@FPR, generalization gap).
+- Final consolidated report.
+
+## [1.1.0] — 2026-11-12
+
 ### Added
 
 - Standalone **PR1 report** `reports/БИИ_PR1.docx` / `reports/БИИ_PR1.pdf`
   (Russian, 13 pages, no formulas): methodology, eight quality characteristics with
   95 % Wilson CIs, near-duplicate train↔test examples, brightness/blur distributions,
   anomalies and conclusions.
+- **PR2 — Corruption Robustness** (methodology §3), complete:
+  - Standalone report `reports/БИИ_PR2.docx` / `reports/БИИ_PR2.pdf` (Russian, 13 pages,
+    table-driven): protocol, corruption grid, R(s) curves, ΔM(s), R_rel(s), R-AUC, and
+    visual corruption examples.
+  - Config `configs/pr2_config.yaml` (repo-path adaptation of the PR2 bundle config).
+  - Results `results/pr2/`: `metrics_pr2.json`, `summary.json`, `summary_table.tsv`,
+    `rauc.csv`, `correctness.pkl`, `checksums.sha256`.
+  - Figures `figures/pr2/`: `robustness_curves.png`, `corruption_examples.png`.
+  - Notebook `notebooks/02_corruption_robustness.ipynb` (executed, with outputs).
+  - Program `scripts/reproduce_pr2.py`: model-free verification of all 20 R(s)/ΔM/R_rel
+    values and 4 R-AUC values from `correctness.pkl`.
+  - Documentation updated (`README.md`, `README.ru.md`, `docs/`, folder READMEs);
+    `PR2/README.md` rewritten from placeholder to a completed-work description.
 
 ## [1.0.0] — 2026-02-08
 
@@ -36,12 +57,3 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), adheres to
   - Duplicates: 46 exact (0.6389%) and 262 pixel-verified near duplicates (3.6389%).
 - Repository engineering: Git LFS for model weights, pinned requirements,
   smoke tests, CI workflow, bilingual documentation.
-
-## [Unreleased]
-
-### Planned
-
-- PR2: Corruption Robustness (noise, blur, JPEG, brightness) — R(s) curves and R-AUC.
-- PR3: Adversarial Robustness (white-box: FGSM, PGD, AutoAttack sanity check).
-- PR4: Privacy — Membership Inference Attack (ROC-AUC, TPR@FPR, generalization gap).
-- Final consolidated report.

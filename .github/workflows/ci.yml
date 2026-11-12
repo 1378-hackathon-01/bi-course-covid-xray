@@ -27,3 +27,6 @@ jobs:
 
       - name: Run smoke tests
         run: python -m pytest tests/ -v
+
+      - name: Verify PR2 artifacts (model-free)
+        run: python scripts/reproduce_pr2.py
