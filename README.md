@@ -6,9 +6,10 @@ studied through the practical cycle of the course
 (*Security and Trustworthiness of Artificial Intelligence Systems*).
 
 This repository contains the **completed preliminary stage** (methodology §1),
-**Practical Work №1 — Data Quality Investigation** (methodology §2) and
-**Practical Work №2 — Corruption Robustness** (methodology §3). Practical works
-PR3 and PR4 are represented by placeholders and will be added without restructuring.
+**Practical Work №1 — Data Quality Investigation** (methodology §2),
+**Practical Work №2 — Corruption Robustness** (methodology §3) and
+**Practical Work №3 — Adversarial Robustness** (methodology §4). Practical work
+PR4 is represented by a placeholder and will be added without restructuring.
 
 ---
 
@@ -48,8 +49,12 @@ attributable to the studied effect rather than to retraining.
    (Gaussian noise, Poisson noise, Gaussian blur, JPEG) at five non-zero severity
    levels, robustness curves R(s) with 95 % intervals, ΔM(s), R_rel(s) and R-AUC
    with percentile/BCa bootstrap intervals.
+4. **PR3 (§4)** — adversarial robustness under an explicit white-box threat model:
+   FGSM and PGD-10 on the ε grid {1, 2, 4, 8, 16}/255, ASR computed over clean-correct
+   objects, Robust Accuracy, Validity Rate, L₂/L∞ magnitudes, R-AUC_ε, a multi-seed
+   check and an independent APGD-CE sanity check.
 
-**What is not included (yet):** PR3 and PR4 results and the final consolidated report.
+**What is not included (yet):** PR4 results and the final consolidated report.
 Their folders exist as placeholders so that future work does not require renaming or
 moving any file. The dataset itself, the course PDFs and the original demo application
 are **not** redistributed here.
@@ -77,18 +82,20 @@ BI-COURSE-REPO/
 │   ├── models/                     # ResNet-18 architecture + frozen loader
 │   └── utils/                      # seed, metrics (Wilson/bootstrap), I/O helpers
 ├── notebooks/                      # 00_train_baseline.ipynb, 01_data_quality.ipynb,
-│                                   # 02_corruption_robustness.ipynb
-├── configs/                        # preliminary_config.yaml, pr1_config.yaml, pr2_config.yaml
+│                                   # 02_corruption_robustness.ipynb, 03_adversarial_robustness.ipynb
+├── configs/                        # preliminary_config.yaml, pr1_config.yaml, pr2_config.yaml,
+│                                   # pr3_config.yaml
 ├── results/
 │   ├── preliminary/                # metrics.json, training_history.json, split_indices.json, latency
 │   ├── pr1/                        # metrics_pr1.json, quality_profile.csv, label_inspection.csv, ...
-│   └── pr2/                        # metrics_pr2.json, summary_table.tsv, rauc.csv, correctness.pkl
-├── reports/                        # БИИ_preliminary (+ simple), БИИ_PR1 and БИИ_PR2 (pdf|docx)
-├── figures/                        # preliminary/ (empty), pr1/ and pr2/ (300-dpi PNGs)
-├── scripts/                        # reproduce_preliminary.py, reproduce_pr1.py, reproduce_pr2.py, latency tool
+│   ├── pr2/                        # metrics_pr2.json, summary_table.tsv, rauc.csv, correctness.pkl
+│   └── pr3/                        # metrics_pr3.json, attack table, R-AUC, validity, masks
+├── reports/                        # БИИ_preliminary (+ simple), БИИ_PR1, БИИ_PR2 and БИИ_PR3 (pdf|docx)
+├── figures/                        # preliminary/ (empty), pr1/, pr2/ and pr3/ (300-dpi PNGs)
+├── scripts/                        # reproduce_preliminary.py, reproduce_pr1/2/3.py, latency tool
 ├── tests/                          # pytest smoke tests (data, model, metrics)
 ├── PR2/                            # PR2 description (complete)
-├── PR3/                            # placeholder: Adversarial Robustness (TODO)
+├── PR3/                            # PR3 description (complete)
 ├── PR4/                            # placeholder: Privacy / MIA (TODO)
 └── final_report/                   # placeholder: consolidated report (TODO after PR4)
 ```
@@ -139,9 +146,31 @@ occurs at the lowest level for Gaussian noise (σ = 0.005, R = 0.8181,
 [0.0083; 0.0375]) and JPEG (q = 90, R = 0.9694, ΔM = 0.0139 [0.0027; 0.0278]).
 Collapse (R(s) < 0.55) is reached at σ ≥ 0.02, λ ≤ 2048, σ_px ≥ 3.5 and q = 15.
 
+**PR3 (adversarial robustness, white-box L∞).** The same frozen model on a deterministic
+200-image subset (100 COVID / 100 Normal, 197 clean-correct):
+
+| Attack | ε, /255 | FR = ASR [95 % CI] | Robust accuracy [95 % CI] | R-AUC_ε [95 % CI] |
+|---|---:|---|---|---|
+| PGD-10 | 1–8 | 1.000 [0.981; 1.000] | 0.000 [0.000; 0.019] | 0.0320 [0.0303; 0.0348] |
+| PGD-10 | 16 | 0.995 [0.972; 0.999] | 0.005 [0.001; 0.028] | — |
+| FGSM | 1 | 0.558 [0.489; 0.626] | 0.435 [0.368; 0.504] | 0.5111 [0.4497; 0.5798] |
+| FGSM | 2–16 | 0.503 [0.433; 0.572] | 0.500 [0.431; 0.569] | — |
+
+PGD-10 already breaks all 197 clean-correct images at ε = 1/255. FGSM saturates at
+ε ≥ 2/255; its plateau RA = 0.500 is the random-guessing level on a balanced subset, not
+evidence of robustness. The ★ next to FGSM in the report marks the higher measured R-AUC_ε
+only. The multi-seed PGD series (42/43/44) gives FR = 1.000 with zero variance, and the
+independent APGD-CE check (20 images, ε = 8/255) gives FR = 1.000 [0.839; 1.000] and
+RA = 0.000 [0.000; 0.161] — no sign of gradient masking. All 2000 generated adversarial
+examples are valid (Validity Rate = 1.000; maximum L∞ = 0.06275).
+
 **What these results mean.** The dataset is balanced and representative (no distribution
 shift, negligible label noise), which makes Accuracy a valid primary metric and justifies
-measuring robustness curves on this test set. At the same time, 3.64% pixel-confirmed near
+measuring robustness curves on this test set. Within the fixed white-box threat model,
+PR3 shows that the model does not retain correct predictions under small L∞ perturbations:
+the smallest budget ε = 1/255 is sufficient for a complete PGD failure on the subset.
+This is a conditional statement about the measured attacks, not a claim about clinical
+safety or about other threat models. At the same time, 3.64% pixel-confirmed near
 duplicates and 7 + 64 train↔test pairs constitute a real file-level leakage: some test
 images have near-identical twins in the training set. This property is documented and
 carried into the interpretation of PR2–PR4 (it may slightly inflate robustness and
@@ -160,6 +189,7 @@ python -m pip install -r requirements.txt
 python scripts/reproduce_preliminary.py   # reproduces M(0) = 0.9833
 python scripts/reproduce_pr1.py           # reproduces PR1 core metrics
 python scripts/reproduce_pr2.py           # reproduces PR2 R(s), ΔM and R-AUC (no model needed)
+python scripts/reproduce_pr3.py           # reproduces PR3 FR/RA, Wilson CIs and R-AUC_ε (no model needed)
 ```
 
 Requirements: Python 3.13, Git LFS, ~50 MB of disk for the checkpoint (plus the dataset).
@@ -170,8 +200,9 @@ All reported numbers were obtained on CPU/GPU as documented; inference also work
 
 See [`docs/reproduction_guide.md`](docs/reproduction_guide.md) for the full step-by-step
 procedure: prerequisites, LFS clone, dataset acquisition, checkpoint SHA-256 verification,
-reproduction of the baseline metric, of the PR1 analysis and of the PR2 robustness
-metrics, and verification against the stored `results/` artifacts. A condensed version:
+reproduction of the baseline metric, of the PR1 analysis, of the PR2 robustness
+metrics and of the PR3 adversarial-robustness metrics, and verification against the
+stored `results/` artifacts. A condensed version:
 
 1. Install dependencies from `requirements.txt`.
 2. Download the dataset and build `data/raw/{COVID,Normal}` (3600 images per class).
@@ -181,6 +212,9 @@ metrics, and verification against the stored `results/` artifacts. A condensed v
 6. Run `scripts/reproduce_pr2.py` and compare with `results/pr2/summary_table.tsv`
    and `results/pr2/rauc.csv`; the full curve with bootstrap intervals is reproduced
    by `notebooks/02_corruption_robustness.ipynb` (needs the checkpoint and the dataset).
+7. Run `scripts/reproduce_pr3.py` and compare with `results/pr3/`; the attack pipeline,
+   bootstrap bands and figures are reproduced by
+   `notebooks/03_adversarial_robustness.ipynb` (needs the checkpoint, the dataset and a GPU).
 
 ## 8. Datasets
 
@@ -207,7 +241,7 @@ address after publishing.
 ## 11. Changelog
 
 Version history follows *Keep a Changelog* — see [`CHANGELOG.md`](CHANGELOG.md).
-Current version: **1.1.0** (preliminary stage + PR1 + PR2).
+Current version: **1.2.0** (preliminary stage + PR1 + PR2 + PR3).
 
 ## 12. Roadmap
 
@@ -216,7 +250,7 @@ Current version: **1.1.0** (preliminary stage + PR1 + PR2).
 | Preliminary | Baseline model, dataset, splits, primary metric, fixation | **done** |
 | PR1 | Data quality investigation (§2) | **done** |
 | PR2 | Robustness to natural corruptions (noise, blur, JPEG), R(s), R-AUC | **done** — `PR2/` |
-| PR3 | Adversarial robustness (white-box FGSM/PGD + sanity attack), ASR, R-AUC_ε | planned — `PR3/` |
+| PR3 | Adversarial robustness (white-box FGSM/PGD + sanity attack), ASR, R-AUC_ε | **done** — `PR3/` |
 | PR4 | Privacy: Membership Inference Attack (ROC-AUC, TPR@FPR, gap) | planned — `PR4/` |
 | Final | Consolidated report across PR1–PR4 | planned — `final_report/` |
 

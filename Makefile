@@ -3,22 +3,23 @@
 
 PY ?= python
 
-.PHONY: help install reproduce reproduce-preliminary reproduce-pr1 reproduce-pr2 test clean
+.PHONY: help install reproduce reproduce-preliminary reproduce-pr1 reproduce-pr2 reproduce-pr3 test clean
 
 help:
 	@echo "Available commands:"
 	@echo "  make install                - Install dependencies"
-	@echo "  make reproduce              - Reproduce preliminary + PR1 + PR2 results"
+	@echo "  make reproduce              - Reproduce preliminary + PR1 + PR2 + PR3 results"
 	@echo "  make reproduce-preliminary  - Reproduce the frozen baseline metric M(0)"
 	@echo "  make reproduce-pr1          - Reproduce PR1 data-quality metrics"
 	@echo "  make reproduce-pr2          - Reproduce PR2 robustness metrics (model-free)"
+	@echo "  make reproduce-pr3          - Reproduce PR3 adversarial metrics (model-free)"
 	@echo "  make test                   - Run smoke tests"
 	@echo "  make clean                  - Remove caches and temporary files"
 
 install:
 	$(PY) -m pip install -r requirements.txt
 
-reproduce: reproduce-preliminary reproduce-pr1 reproduce-pr2
+reproduce: reproduce-preliminary reproduce-pr1 reproduce-pr2 reproduce-pr3
 
 reproduce-preliminary:
 	$(PY) scripts/reproduce_preliminary.py
@@ -28,6 +29,9 @@ reproduce-pr1:
 
 reproduce-pr2:
 	$(PY) scripts/reproduce_pr2.py
+
+reproduce-pr3:
+	$(PY) scripts/reproduce_pr3.py
 
 test:
 	$(PY) -m pytest tests/ -v

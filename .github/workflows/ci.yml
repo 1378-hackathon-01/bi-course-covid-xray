@@ -30,3 +30,6 @@ jobs:
 
       - name: Verify PR2 artifacts (model-free)
         run: python scripts/reproduce_pr2.py
+
+      - name: Verify PR3 artifacts (model-free)
+        run: python scripts/reproduce_pr3.py

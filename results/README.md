@@ -30,6 +30,21 @@
 | `correctness.pkl` | Per-object, per-realization correctness matrix of the frozen model for the clean test set and all 20 (corruption, severity) cells — the input of `scripts/reproduce_pr2.py`. |
 | `checksums.sha256` | Checksums of the PR2 artifacts plus the inherited preliminary files and `models/baseline_model.pt`. |
 
+## `pr3/`
+
+| File | Contents |
+|---|---|
+| `metrics_pr3.json` | Machine-readable PR3 results, kept verbatim from the PR3 bundle: protocol and threat model, attack parameters, the 10 (attack, ε) rows with Wilson intervals, R-AUC_ε with percentile intervals, validity statistics, multi-seed series and the APGD-CE sanity check. |
+| `pr3_adv_attacks.csv` | The 10-row table behind §7 of the report: FR (= ASR), Robust Accuracy and their 95 % Wilson bounds, the number of broken clean-correct objects and the number of wrong adversarial predictions. |
+| `pr3_rauc.csv` | R-AUC_ε for FGSM and PGD-10 with 95 % percentile bootstrap intervals. |
+| `pr3_validity_l2.csv` | Validity Rate with Wilson bounds, L₂ mean/max and L∞ max for all 10 cells, together with the ε bound. |
+| `pr3_multiseed_pgd.csv` | PGD-10 at ε = 8/255 for seeds 42, 43 and 44 (FR, Wilson bounds, Robust Accuracy). |
+| `pr3_autoattack.json` | APGD-CE (`torchattacks`) sanity check at ε = 8/255 on 20 clean-correct images, with Wilson intervals. |
+| `pr3_summary.json` | Compact notebook summary: attack rows, R-AUC_ε, the ε grid and the bootstrap bands. |
+| `pr3_masks.pkl` | Per-object clean/adversarial correctness masks for the 200-image subset over all 10 cells — the input of `scripts/reproduce_pr3.py`. |
+| `pr3_masks_fgsm.pkl` | Per-object FGSM correctness masks (intermediate notebook cache). |
+| `checksums.sha256` | Checksums of the PR3 artifacts and inherited files. |
+
 ## Provenance
 
 All numbers were produced by the executed notebooks in `notebooks/` and are consistent with
@@ -42,4 +57,10 @@ and 4 R-AUC values) are re-derived from `pr2/correctness.pkl` by
 reproduced by `notebooks/02_corruption_robustness.ipynb`.
 `metrics_pr2.json` keeps the submission-relative path strings of the original PR2 bundle
 (e.g. `PR2.ipynb`, `PRELIMINARY_SUBMISSION_V2/split_indices.json`); the repository-local
-equivalents are listed in `configs/pr2_config.yaml`.
+equivalents are listed in `configs/pr2_config.yaml`. The PR3 point estimates (10 FR/RA
+pairs), their Wilson intervals and both R-AUC_ε values are re-derived exactly from
+`pr3/pr3_masks.pkl` by `scripts/reproduce_pr3.py`, which reports `RESULT: PASS`; the
+percentile bootstrap intervals for R-AUC_ε and the figures are reproduced by
+`notebooks/03_adversarial_robustness.ipynb`. `metrics_pr3.json` likewise keeps the
+submission-relative strings of the PR3 bundle; the repository-local equivalents are listed
+in `configs/pr3_config.yaml`.

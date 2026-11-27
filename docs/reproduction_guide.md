@@ -70,11 +70,29 @@ intervals (hierarchical/paired bootstrap, B = 2000, percentile + BCa) are reprod
 `notebooks/02_corruption_robustness.ipynb`, which needs the checkpoint and the dataset;
 the resulting curves are in `figures/pr2/robustness_curves.png`.
 
-### 9. Verify stored artifacts
+### 9. Reproduce the PR3 adversarial-robustness metrics
+
+```bash
+python scripts/reproduce_pr3.py
+# expected: 10 (attack, epsilon) rows, both R-AUC_eps values,
+#           validity, multi-seed and APGD-CE checks, RESULT: PASS
+```
+
+The program is model-free: it recomputes FR (= ASR), Robust Accuracy, the Wilson
+intervals and R-AUC_ε from the stored per-object correctness masks
+(`results/pr3/pr3_masks.pkl`) and compares them with `results/pr3/pr3_adv_attacks.csv`,
+`results/pr3/pr3_rauc.csv`, `results/pr3/pr3_validity_l2.csv`,
+`results/pr3/pr3_multiseed_pgd.csv` and `results/pr3/pr3_autoattack.json`. The attack
+pipeline, the percentile bootstrap bands and the figures are reproduced by
+`notebooks/03_adversarial_robustness.ipynb`, which needs the checkpoint, the dataset and
+a GPU (the main PGD run took about 1026 s on CUDA; FGSM took about 49 s).
+
+### 10. Verify stored artifacts
 
 Every artifact in `results/` was produced by the executed notebooks;
-`results/pr1/checksums.sha256` lists the PR1 files and `results/pr2/checksums.sha256`
-lists the PR2 files plus the inherited preliminary artifacts. Compare the outputs of the
+`results/pr1/checksums.sha256` lists the PR1 files, `results/pr2/checksums.sha256`
+lists the PR2 files plus the inherited preliminary artifacts, and
+`results/pr3/checksums.sha256` lists the PR3 files. Compare the outputs of the
 programs above with the stored JSON/CSV.
 
 ## Русский
@@ -147,9 +165,26 @@ python scripts/reproduce_pr2.py
 `notebooks/02_corruption_robustness.ipynb`, для которого нужны чекпойнт и данные;
 итоговые кривые — в `figures/pr2/robustness_curves.png`.
 
-### 9. Проверка артефактов
+### 9. Воспроизведение состязательных метрик ПР3
+
+```bash
+python scripts/reproduce_pr3.py
+# ожидается: 10 строк (атака, ε), оба значения R-AUC_ε,
+#            проверки валидности, multi-seed и APGD-CE, RESULT: PASS
+```
+
+Программа не требует модели: она пересчитывает FR (= ASR), Robust Accuracy, интервалы
+Уилсона и R-AUC_ε из сохранённых поэкземплярных масок правильности
+(`results/pr3/pr3_masks.pkl`) и сравнивает с `results/pr3/pr3_adv_attacks.csv`,
+`results/pr3/pr3_rauc.csv`, `results/pr3/pr3_validity_l2.csv`,
+`results/pr3/pr3_multiseed_pgd.csv` и `results/pr3/pr3_autoattack.json`. Конвейер атак,
+процентильные bootstrap-полосы и рисунки воспроизводятся ноутбуком
+`notebooks/03_adversarial_robustness.ipynb`, для которого нужны чекпойнт, данные и GPU
+(основной прогон PGD занял около 1026 с на CUDA, FGSM — около 49 с).
+
+### 10. Проверка артефактов
 
 Все артефакты в `results/` получены исполненными ноутбуками; `results/pr1/checksums.sha256`
-содержит контрольные суммы файлов ПР1, а `results/pr2/checksums.sha256` — файлов ПР2
-и унаследованных артефактов предварительного этапа. Сравните вывод программ с
-сохранёнными JSON/CSV.
+содержит контрольные суммы файлов ПР1, `results/pr2/checksums.sha256` — файлов ПР2
+и унаследованных артефактов предварительного этапа, а `results/pr3/checksums.sha256` —
+файлов ПР3. Сравните вывод программ с сохранёнными JSON/CSV.

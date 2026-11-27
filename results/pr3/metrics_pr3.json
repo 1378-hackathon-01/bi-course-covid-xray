@@ -1,0 +1,511 @@
+{
+  "package": "PR3_SUBMISSION_V2",
+  "protocol": {
+    "random_seed": 42,
+    "attack_subset_n": 200,
+    "attack_subset_covid": 100,
+    "attack_subset_normal": 100,
+    "attack_subset_selection": "детерминированная стратифицированная выборка rng = default_rng(42), по 100 объектов каждого класса из теста",
+    "clean_correct": 197,
+    "clean_errors": 3,
+    "M_sub": 0.985,
+    "M_sub_ci95_wilson": [
+      0.9568342712073097,
+      0.9948857622067417
+    ],
+    "reference_M0_test": 0.9833333333333333,
+    "reference_M0_ci95_wilson": [
+      0.9710958188034222,
+      0.9904407048628867
+    ],
+    "epsilon_grid_255": [
+      1.0,
+      2.0,
+      4.0,
+      8.0,
+      16.0
+    ],
+    "epsilon_grid_01": [
+      0.00392156862745098,
+      0.00784313725490196,
+      0.01568627450980392,
+      0.03137254901960784,
+      0.06274509803921569
+    ],
+    "total_adversarial_examples": 2000,
+    "bootstrap_B": 2000,
+    "confidence": 0.95
+  },
+  "threat_model": {
+    "knowledge": "white-box: архитектура, веса и градиенты",
+    "goal": "untargeted: любая смена правильного предсказания на неверное",
+    "access": "gradients",
+    "perturbation_space": "L_inf в пиксельном пространстве [0,1] после Resize(224,224)",
+    "attack_budget": "epsilon in {1,2,4,8,16}/255; query budget не применим для white-box",
+    "validity_constraints": "все adversarial-примеры клиппируются к [0,1]",
+    "clinical_scenario": "искажение снимка при передаче или сохранении DICOM/PNG; цель — ложная тревога или пропуск диагноза"
+  },
+  "attacks": {
+    "FGSM": {
+      "description": "одношаговая атака по знаку градиента кросс-энтропии",
+      "iterations": 1,
+      "restarts": 1,
+      "step": "epsilon"
+    },
+    "PGD10": {
+      "description": "проекционная градиентная атака, best-of-loss по случайным стартам",
+      "iterations": 10,
+      "restarts": 3,
+      "step": "epsilon/4",
+      "random_start": "Uniform(-epsilon, epsilon)",
+      "selection": "лучший restart по значению функции потерь"
+    },
+    "AutoAttack_sanity": {
+      "implementation": "torchattacks.APGD, loss=ce, 100 iterations, 1 restart",
+      "epsilon_255": 8.0,
+      "subset_n": 20,
+      "subset": "10 COVID + 10 Normal, детерминированно",
+      "scope": "ключевой компонент AutoAttack APGD-CE; полная композиция с targeted/DLR неприменима при двух классах"
+    }
+  },
+  "metrics": {
+    "clean_performance": "accuracy на чистых 200 объектах подмножества",
+    "robust_performance": "accuracy на adversarial-наборе, знаменатель 200",
+    "ASR": "N_fooled / N_clean_correct; только объекты, верно классифицированные на чистом входе",
+    "R_AUC_eps": "нормированная площадь под кривой robust_accuracy(epsilon) на сетке 0..16/255, trapezoid; на каждой bootstrap-перевыборке кривая строится заново",
+    "validity_rate": "N_valid / N_generated; проверка конечности и диапазона [0,1]",
+    "perturbation_magnitude": "L2 и L_inf нормы разности x_adv - x_clean"
+  },
+  "results": [
+    {
+      "method": "FGSM",
+      "epsilon_255": 1.0,
+      "epsilon_01": 0.00392156862745098,
+      "n_clean_correct": 197,
+      "n_fooled": 110,
+      "ASR": 0.5583756345177665,
+      "ASR_ci95_wilson": [
+        0.48857304466051565,
+        0.625945143641103
+      ],
+      "robust_accuracy": 0.435,
+      "robust_accuracy_ci95_wilson": [
+        0.36815725502699076,
+        0.504292637402054
+      ],
+      "n_wrong_all": 113
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 2.0,
+      "epsilon_01": 0.00784313725490196,
+      "n_clean_correct": 197,
+      "n_fooled": 99,
+      "ASR": 0.5025380710659898,
+      "ASR_ci95_wilson": [
+        0.4333405227308971,
+        0.5716385289343908
+      ],
+      "robust_accuracy": 0.5,
+      "robust_accuracy_ci95_wilson": [
+        0.43136085960389187,
+        0.5686391403961082
+      ],
+      "n_wrong_all": 100
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 4.0,
+      "epsilon_01": 0.01568627450980392,
+      "n_clean_correct": 197,
+      "n_fooled": 99,
+      "ASR": 0.5025380710659898,
+      "ASR_ci95_wilson": [
+        0.4333405227308971,
+        0.5716385289343908
+      ],
+      "robust_accuracy": 0.5,
+      "robust_accuracy_ci95_wilson": [
+        0.43136085960389187,
+        0.5686391403961082
+      ],
+      "n_wrong_all": 100
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 8.0,
+      "epsilon_01": 0.03137254901960784,
+      "n_clean_correct": 197,
+      "n_fooled": 99,
+      "ASR": 0.5025380710659898,
+      "ASR_ci95_wilson": [
+        0.4333405227308971,
+        0.5716385289343908
+      ],
+      "robust_accuracy": 0.5,
+      "robust_accuracy_ci95_wilson": [
+        0.43136085960389187,
+        0.5686391403961082
+      ],
+      "n_wrong_all": 100
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 16.0,
+      "epsilon_01": 0.06274509803921569,
+      "n_clean_correct": 197,
+      "n_fooled": 99,
+      "ASR": 0.5025380710659898,
+      "ASR_ci95_wilson": [
+        0.4333405227308971,
+        0.5716385289343908
+      ],
+      "robust_accuracy": 0.5,
+      "robust_accuracy_ci95_wilson": [
+        0.43136085960389187,
+        0.5686391403961082
+      ],
+      "n_wrong_all": 100
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 1.0,
+      "epsilon_01": 0.00392156862745098,
+      "n_clean_correct": 197,
+      "n_fooled": 197,
+      "ASR": 1.0,
+      "ASR_ci95_wilson": [
+        0.9808731780616886,
+        1.0
+      ],
+      "robust_accuracy": 0.0,
+      "robust_accuracy_ci95_wilson": [
+        1.734723475976807e-18,
+        0.018845326377266575
+      ],
+      "n_wrong_all": 200
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 2.0,
+      "epsilon_01": 0.00784313725490196,
+      "n_clean_correct": 197,
+      "n_fooled": 197,
+      "ASR": 1.0,
+      "ASR_ci95_wilson": [
+        0.9808731780616886,
+        1.0
+      ],
+      "robust_accuracy": 0.0,
+      "robust_accuracy_ci95_wilson": [
+        1.734723475976807e-18,
+        0.018845326377266575
+      ],
+      "n_wrong_all": 200
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 4.0,
+      "epsilon_01": 0.01568627450980392,
+      "n_clean_correct": 197,
+      "n_fooled": 197,
+      "ASR": 1.0,
+      "ASR_ci95_wilson": [
+        0.9808731780616886,
+        1.0
+      ],
+      "robust_accuracy": 0.0,
+      "robust_accuracy_ci95_wilson": [
+        1.734723475976807e-18,
+        0.018845326377266575
+      ],
+      "n_wrong_all": 200
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 8.0,
+      "epsilon_01": 0.03137254901960784,
+      "n_clean_correct": 197,
+      "n_fooled": 197,
+      "ASR": 1.0,
+      "ASR_ci95_wilson": [
+        0.9808731780616886,
+        1.0
+      ],
+      "robust_accuracy": 0.0,
+      "robust_accuracy_ci95_wilson": [
+        1.734723475976807e-18,
+        0.018845326377266575
+      ],
+      "n_wrong_all": 200
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 16.0,
+      "epsilon_01": 0.06274509803921569,
+      "n_clean_correct": 197,
+      "n_fooled": 196,
+      "ASR": 0.9949238578680203,
+      "ASR_ci95_wilson": [
+        0.9718117011677008,
+        0.9991033735634125
+      ],
+      "robust_accuracy": 0.005,
+      "robust_accuracy_ci95_wilson": [
+        0.0008831687156009814,
+        0.02777370439789293
+      ],
+      "n_wrong_all": 199
+    }
+  ],
+  "rauc": [
+    {
+      "method": "FGSM",
+      "R_AUC_eps": 0.51109375,
+      "ci95_percentile": [
+        0.44967968750000004,
+        0.57984375
+      ]
+    },
+    {
+      "method": "PGD10",
+      "R_AUC_eps": 0.03203125,
+      "ci95_percentile": [
+        0.0303125,
+        0.03484375
+      ]
+    }
+  ],
+  "validity": [
+    {
+      "method": "FGSM",
+      "epsilon_255": 1.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 1.5091335773468018,
+      "l2_max": 1.521487832069397,
+      "linf_max": 0.003921598196029663,
+      "epsilon_bound_01": 0.00392156862745098
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 2.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 3.0154683589935303,
+      "l2_max": 3.042975664138794,
+      "linf_max": 0.007843166589736938,
+      "epsilon_bound_01": 0.00784313725490196
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 4.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 6.022119998931885,
+      "l2_max": 6.085951328277588,
+      "linf_max": 0.01568630337715149,
+      "epsilon_bound_01": 0.01568627450980392
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 8.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 12.00987720489502,
+      "l2_max": 12.171902656555176,
+      "linf_max": 0.03137257695198059,
+      "epsilon_bound_01": 0.03137254901960784
+    },
+    {
+      "method": "FGSM",
+      "epsilon_255": 16.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 23.908964157104492,
+      "l2_max": 24.34380340576172,
+      "linf_max": 0.0627451241016388,
+      "epsilon_bound_01": 0.06274509803921569
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 1.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 1.0133287906646729,
+      "l2_max": 1.0302510261535645,
+      "linf_max": 0.003921598196029663,
+      "epsilon_bound_01": 0.00392156862745098
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 2.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 1.9863622188568115,
+      "l2_max": 2.0202181339263916,
+      "linf_max": 0.007843166589736938,
+      "epsilon_bound_01": 0.00784313725490196
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 4.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 3.9315099716186523,
+      "l2_max": 3.976849317550659,
+      "linf_max": 0.01568630337715149,
+      "epsilon_bound_01": 0.01568627450980392
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 8.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 7.817102909088135,
+      "l2_max": 7.919318199157715,
+      "linf_max": 0.03137257695198059,
+      "epsilon_bound_01": 0.03137254901960784
+    },
+    {
+      "method": "PGD10",
+      "epsilon_255": 16.0,
+      "n_generated": 200,
+      "n_valid": 200,
+      "validity_rate": 1.0,
+      "validity_rate_ci95_wilson": [
+        0.9811546736227335,
+        1.0
+      ],
+      "l2_mean": 15.542241096496582,
+      "l2_max": 15.781593322753906,
+      "linf_max": 0.0627451241016388,
+      "epsilon_bound_01": 0.06274509803921569
+    }
+  ],
+  "multiseed_pgd": [
+    {
+      "seed": 42,
+      "method": "PGD10",
+      "epsilon_255": 8.0,
+      "ASR": 1.0,
+      "ASR_ci95_wilson": [
+        0.9808731780616886,
+        1.0
+      ],
+      "robust_accuracy": 0.0
+    },
+    {
+      "seed": 43,
+      "method": "PGD10",
+      "epsilon_255": 8.0,
+      "ASR": 1.0,
+      "ASR_ci95_wilson": [
+        0.9808731780616886,
+        1.0
+      ],
+      "robust_accuracy": 0.0
+    },
+    {
+      "seed": 44,
+      "method": "PGD10",
+      "epsilon_255": 8.0,
+      "ASR": 1.0,
+      "ASR_ci95_wilson": [
+        0.9808731780616886,
+        1.0
+      ],
+      "robust_accuracy": 0.0
+    }
+  ],
+  "autoattack": {
+    "eps": 8.0,
+    "n_subset": 20,
+    "n_clean_correct": 20,
+    "n_fooled": 20,
+    "FR": 1.0,
+    "FR_ci": [
+      0.8388748419471806,
+      1.0
+    ],
+    "robust_acc": 0.0,
+    "robust_acc_ci": [
+      0.0,
+      0.16112515805281938
+    ],
+    "checker": "torchattacks.APGD (loss=ce, 100 iters) — основной компонент AutoAttack",
+    "note": "targeted/DLR-компоненты неприменимы при n_classes=2; один вызов на 20 снимках из-за утечки VRAM в torchattacks APGD и 4 ГБ GPU"
+  },
+  "key_findings": {
+    "clean": "M_sub(0) = 0.9850 [0.9568; 0.9949]; 197 из 200 чисто-верных",
+    "pgd": "ASR = 1.000 [0.981; 1.000] уже при epsilon = 1/255; robust_accuracy = 0.000 [0.000; 0.019]; R-AUC_eps = 0.0320 [0.0303; 0.0348]",
+    "fgsm": "ASR = 0.558 [0.489; 0.626] при epsilon = 1/255; при epsilon >= 2/255 ASR = 0.503 [0.433; 0.572], robust_accuracy = 0.500 [0.431; 0.569]; R-AUC_eps = 0.5111 [0.4497; 0.5798]",
+    "autoattack": "APGD-CE при epsilon = 8/255 на 20 снимках: ASR = 1.000 [0.839; 1.000], robust_accuracy = 0.000 [0.000; 0.161] — согласуется с PGD-10",
+    "validity": "2000/2000 adversarial-примеров валидны; Validity Rate = 1.000",
+    "seed_stability": "PGD при epsilon = 8/255: ASR = 1.000 для seed 42, 43, 44",
+    "conclusion": "в рамках white-box L_inf threat model модель не демонстрирует устойчивости: минимальный бюджет 1/255 достаточен для полного отказа PGD на подмножестве; FGSM насыщается на уровне случайного угадывания"
+  },
+  "deviations": {
+    "autoattack": "использован APGD-CE, а не полная композиция AutoAttack; targeted/DLR-компоненты не определены для двух классов",
+    "autoattack_subset": "20 снимков вместо 200 из-за ограничения VRAM реализации torchattacks",
+    "cw": "CW-атака не выполнялась: для двухклассовой задачи достаточно FGSM и PGD",
+    "targeted": "целевые атаки не выполнялись; направление ошибки COVID→Normal не измерено",
+    "resolution": "атака применяется после Resize(224,224), а не к нативному 299x299",
+    "defense": "adversarial training и другие защиты не выполнялись: чекпоинт заморожен",
+    "multiple_comparisons": "поправка на множественные сравнения не применялась"
+  },
+  "verification": {
+    "rows": 10,
+    "rauc_rows": 2,
+    "validity_rows": 10,
+    "autoattack_subset": 20,
+    "manifest_excludes": [
+      "checksums.sha256"
+    ]
+  }
+}

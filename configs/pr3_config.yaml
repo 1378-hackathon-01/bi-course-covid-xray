@@ -1,0 +1,109 @@
+# Конфигурация ПР3 — состязательная устойчивость замороженной модели.
+# Общие параметры (seed, модель, сплит) наследуются из configs/preliminary_config.yaml;
+# машиночитаемые результаты — в results/pr3/metrics_pr3.json (этот файл — его YAML-двойник).
+# Пути приведены к структуре репозитория; исходная версия — config_pr3.yaml пакета ПР3.
+pr3:
+  reference:
+    preliminary: configs/preliminary_config.yaml
+    canonical: results/pr3/metrics_pr3.json
+  random_seed: 42
+  model:
+    architecture: ResNet18 (torchvision)
+    head: Sequential(Dropout(0.5), Linear(512, 2))
+    checkpoint: models/baseline_model.pt
+    checkpoint_sha256: 0ba793cb43d0f058af66673a1026e6eef4bd898d98cae05eaf6694cb20b504f0
+    checkpoint_bytes: 44789835
+    frozen: true
+    retrained: false
+    device: cuda
+    eval_transform: Resize(224,224) -> ToTensor -> Normalize(ImageNet mean/std)
+  data:
+    source: COVID-19 Radiography Database v4
+    test_n: 720
+    attack_subset_n: 200
+    attack_subset_covid: 100
+    attack_subset_normal: 100
+    attack_subset_selection: детерминированная стратифицированная выборка default_rng(42), по 100 объектов каждого класса
+    clean_correct: 197
+    clean_errors: 3
+    M_sub: 0.985
+    M_sub_ci95_wilson: [0.9568342712073097, 0.9948857622067417]
+    split: 5760/720/720
+    split_seed: 42
+    split_indices: results/preliminary/split_indices.json
+  threat_model:
+    knowledge: 'white-box: архитектура, веса и градиенты'
+    goal: 'untargeted: любая смена правильного предсказания на неверное'
+    access: gradients
+    perturbation_space: L_inf в пиксельном пространстве [0,1] после Resize(224,224)
+    attack_budget: epsilon in {1,2,4,8,16}/255; query budget не применим для white-box
+    validity_constraints: все adversarial-примеры клиппируются к [0,1]
+    clinical_scenario: искажение снимка при передаче или сохранении DICOM/PNG; цель — ложная тревога или пропуск диагноза
+  attacks:
+    FGSM:
+      implementation: PyTorch (собственная реализация; не torchattacks)
+      description: одношаговая атака по знаку градиента кросс-энтропии
+      iterations: 1
+      restarts: 1
+      step: epsilon
+    PGD10:
+      implementation: PyTorch (собственная реализация; не torchattacks)
+      description: проекционная градиентная атака, best-of-loss по случайным стартам
+      iterations: 10
+      restarts: 3
+      step: epsilon/4
+      random_start: Uniform(-epsilon, epsilon)
+      selection: лучший restart по значению функции потерь
+    AutoAttack_sanity:
+      implementation: torchattacks 3.5.1, APGD, loss=ce, 100 iterations, 1 restart
+      epsilon_255: 8.0
+      subset_n: 20
+      subset: 10 COVID + 10 Normal, детерминированно
+      scope: ключевой компонент AutoAttack APGD-CE; полная композиция с targeted/DLR неприменима при двух классах
+  bootstrap:
+    B: 2000
+    confidence: 0.95
+    seed: 42
+    R_AUC: bootstrap по объектам; кривая и площадь восстанавливаются на каждой перевыборке
+  metrics:
+    clean_performance: accuracy на чистых 200 объектах подмножества
+    robust_performance: accuracy на adversarial-наборе, знаменатель 200
+    ASR: N_fooled / N_clean_correct; только объекты, верно классифицированные на чистом входе
+    R_AUC_eps: нормированная площадь под кривой robust_accuracy(epsilon) на сетке 0..16/255, trapezoid; на каждой bootstrap-перевыборке кривая строится заново
+    validity_rate: N_valid / N_generated; проверка конечности и диапазона [0,1]
+    perturbation_magnitude: L2 и L_inf нормы разности x_adv - x_clean
+  results:
+    FGSM:
+      ASR_eps1: 0.5584 [0.4886; 0.6259]
+      robust_acc_eps1: 0.4350 [0.3682; 0.5043]
+      ASR_eps2_16: 0.5025 [0.4333; 0.5716]
+      robust_acc_eps2_16: 0.5000 [0.4314; 0.5686]
+      R_AUC_eps: 0.5111 [0.4497; 0.5798]
+    PGD10:
+      ASR_eps1_8: 1.0000 [0.9809; 1.0000]
+      robust_acc_eps1_8: 0.0000 [0.0000; 0.0188]
+      ASR_eps16: 0.9949 [0.9718; 0.9991]
+      robust_acc_eps16: 0.0050 [0.0009; 0.0278]
+      R_AUC_eps: 0.0320 [0.0303; 0.0348]
+    AutoAttack_APGD_CE_eps8_n20: ASR 1.000 [0.839; 1.000]; robust_acc 0.000 [0.000; 0.161]
+    multiseed_pgd_eps8: seeds 42/43/44, ASR 1.000, robust_acc 0.000, variance 0.000
+    validity_rate: 1.0 (2000/2000)
+    max_linf: 0.06275
+  artifacts:
+    report: reports/БИИ_PR3.pdf (DOCX editable copy alongside)
+    notebook: notebooks/03_adversarial_robustness.ipynb
+    figures: [figures/pr3/pr3_adversarial_examples.png, figures/pr3/pr3_robustness_vs_eps.png]
+    tables: [results/pr3/pr3_adv_attacks.csv, results/pr3/pr3_rauc.csv, results/pr3/pr3_validity_l2.csv, results/pr3/pr3_multiseed_pgd.csv]
+    supplements: [results/pr3/pr3_summary.json, results/pr3/pr3_autoattack.json, results/pr3/pr3_masks.pkl, results/pr3/pr3_masks_fgsm.pkl]
+    verifier: scripts/reproduce_pr3.py
+  deviations:
+    implementations: FGSM и PGD-10 реализованы на PyTorch, а не через torchattacks; сигнатуры и параметры соответствуют torchattacks 3.5.1
+    autoattack: использован APGD-CE, а не полная композиция AutoAttack; targeted/DLR-компоненты не определены для двух классов
+    autoattack_subset: 20 снимков вместо 200 из-за ограничения VRAM реализации torchattacks
+    cw: CW-атака не выполнялась: для двухклассовой задачи достаточно FGSM и PGD
+    targeted: целевые атаки не выполнялись; направление ошибки COVID→Normal отдельно не измерено
+    resolution: атака применяется после Resize(224,224), а не к нативному 299x299
+    defense: adversarial training и другие защиты не выполнялись: чекпойнт заморожен
+    multiple_comparisons: поправка на множественные сравнения не применялась
+    paired_bootstrap: отдельный парный bootstrap для F1/ROC-AUC не строился (эти метрики не входят в набор §4.4 для ПР3)
+    latency: 14.70 ± 0.81 мс/снимок перенесены из ПР1; это не повторный замер ПР3

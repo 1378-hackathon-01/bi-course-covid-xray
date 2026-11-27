@@ -1,0 +1,18 @@
+{
+  "eps": 8.0,
+  "n_subset": 20,
+  "n_clean_correct": 20,
+  "n_fooled": 20,
+  "FR": 1.0,
+  "FR_ci": [
+    0.8388748419471806,
+    1.0
+  ],
+  "robust_acc": 0.0,
+  "robust_acc_ci": [
+    0.0,
+    0.16112515805281938
+  ],
+  "checker": "torchattacks.APGD (loss=ce, 100 iters) — основной компонент AutoAttack",
+  "note": "targeted/DLR-компоненты неприменимы при n_classes=2; один вызов на 20 снимках из-за утечки VRAM в torchattacks APGD и 4 ГБ GPU"
+}

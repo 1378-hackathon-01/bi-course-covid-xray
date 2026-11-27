@@ -8,9 +8,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), adheres to
 
 ### Planned
 
-- PR3: Adversarial Robustness (white-box: FGSM, PGD, AutoAttack sanity check).
 - PR4: Privacy — Membership Inference Attack (ROC-AUC, TPR@FPR, generalization gap).
 - Final consolidated report.
+
+## [1.2.0] — 2026-11-27
+
+### Added
+
+- **PR3 — Adversarial Robustness** (methodology §4), complete:
+  - Standalone report `reports/БИИ_PR3.docx` / `reports/БИИ_PR3.pdf` (Russian, 14 pages,
+    13 content tables, 2 figures, no formulas): explicit threat model, FGSM and PGD-10
+    on the ε grid {1, 2, 4, 8, 16}/255, ASR over clean-correct objects, Robust Accuracy,
+    Validity Rate, L₂/L∞, R-AUC_ε, multi-seed PGD and APGD-CE sanity check.
+  - Config `configs/pr3_config.yaml` (repo-path adaptation of the PR3 bundle config).
+  - Results `results/pr3/`: `metrics_pr3.json`, `pr3_adv_attacks.csv`, `pr3_rauc.csv`,
+    `pr3_validity_l2.csv`, `pr3_multiseed_pgd.csv`, `pr3_autoattack.json`,
+    `pr3_summary.json`, per-object correctness masks and `checksums.sha256`.
+  - Figures `figures/pr3/`: `pr3_adversarial_examples.png`, `pr3_robustness_vs_eps.png`.
+  - Notebook `notebooks/03_adversarial_robustness.ipynb` (executed, 12 cells).
+  - Program `scripts/reproduce_pr3.py`: model-free verification of all 10 FR/RA rows,
+    Wilson intervals, both R-AUC_ε values, validity, multi-seed and APGD-CE results
+    from `pr3_masks.pkl`.
+  - Documentation updated (`README.md`, `README.ru.md`, `docs/`, folder READMEs);
+    `PR3/README.md` rewritten from placeholder to a completed-work description.
+  - Key results: PGD-10 FR = 1.000 [0.981; 1.000] at ε = 1/255 (197/197);
+    FGSM FR = 0.558 [0.489; 0.626] at ε = 1/255 with a plateau FR = 0.503 at ε ≥ 2/255;
+    R-AUC_ε = 0.0320 [0.0303; 0.0348] for PGD-10 and 0.5111 [0.4497; 0.5798] for FGSM;
+    Validity Rate = 1.000 (2000/2000).
 
 ## [1.1.0] — 2026-11-12
 
